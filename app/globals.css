@@ -1,0 +1,165 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700;800&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --brand: #f19885;
+  --brand-2: #d89462;
+  --ink: #111827;
+  --paper: #f7f4ee;
+  --line: rgba(17, 24, 39, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--paper);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Inter", Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(241, 152, 133, 0.26);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.article-rail {
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: max(1.25rem, calc((100vw - 80rem) / 2));
+}
+
+.article-card {
+  scroll-snap-align: start;
+}
+
+.soft-grid {
+  background-image:
+    linear-gradient(rgba(17, 24, 39, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 39, 0.055) 1px, transparent 1px);
+  background-size: 42px 42px;
+}
+
+.ambient-loading {
+  background: linear-gradient(110deg, #ebe7de 8%, #f8f5ef 18%, #e7eee9 33%);
+  background-size: 200% 100%;
+  animation: ambient-shimmer 1.8s ease-in-out infinite;
+}
+
+.premium-spotlight {
+  --spotlight-x: 50%;
+  --spotlight-y: 50%;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.premium-spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    420px circle at var(--spotlight-x) var(--spotlight-y),
+    rgba(255, 255, 255, 0.68),
+    rgba(241, 152, 133, 0.14) 34%,
+    transparent 62%
+  );
+  transition: opacity 260ms ease;
+}
+
+.premium-spotlight > * {
+  position: relative;
+  z-index: 1;
+}
+
+.premium-spotlight:hover::before,
+.premium-spotlight:focus-within::before {
+  opacity: 1;
+}
+
+.premium-spotlight-dark::before {
+  background: radial-gradient(
+    420px circle at var(--spotlight-x) var(--spotlight-y),
+    rgba(255, 255, 255, 0.18),
+    rgba(100, 220, 255, 0.12) 34%,
+    transparent 64%
+  );
+}
+
+@keyframes ambient-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.typewriter-text {
+  display: inline-block;
+  max-width: max-content;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 0.08em solid currentColor;
+  animation:
+    typewriter-reveal 1.05s steps(22, end) both,
+    typewriter-caret 0.8s step-end infinite;
+}
+
+@keyframes typewriter-reveal {
+  from {
+    max-width: 0;
+  }
+  to {
+    max-width: 100%;
+  }
+}
+
+@keyframes typewriter-caret {
+  0%,
+  100% {
+    border-color: transparent;
+  }
+  50% {
+    border-color: currentColor;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
