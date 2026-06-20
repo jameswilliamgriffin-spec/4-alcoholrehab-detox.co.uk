@@ -1,45 +1,40 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { LiveChatWidget } from "@livechat/widget-react";
 import {
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "framer-motion";
-import {
+  Activity,
   ArrowRight,
   BadgeCheck,
+  BedDouble,
+  BookOpen,
+  Brain,
+  CalendarDays,
+  Check,
   ChevronRight,
+  CircleAlert,
+  ClipboardCheck,
   Clock3,
-  ExternalLink,
-  Facebook,
+  Droplets,
+  Eye,
   HeartHandshake,
   Home,
-  Instagram,
+  Info,
   LockKeyhole,
-  Mail,
-  MapPin,
+  Menu,
   MessageCircle,
   Phone,
   ShieldCheck,
-  Smile,
   Sparkles,
-  Star,
   Stethoscope,
-  Sun,
-  Sunrise,
-  Sunset,
+  Thermometer,
+  TriangleAlert,
+  UserRoundCheck,
   Users,
-  Moon,
+  X,
+  Zap,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
+import { motion, useReducedMotion } from "framer-motion";
+import { useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -47,1814 +42,981 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const mainSiteUrl = "https://thewellbourneclinic.co.uk/";
-const contactUrl = "https://thewellbourneclinic.co.uk/contact/";
 const phoneNumber = "0330 043 1715";
 const phoneHref = "tel:+443300431715";
-const emailAddress = "info@thewellbourneclinic.com";
-const whatsappUrl = "https://wa.me/447491358745";
-const facebookUrl =
-  "https://www.facebook.com/people/The-Wellbourne-Clinic/61570002121911/";
-const instagramUrl = "https://www.instagram.com/thewellbourneclinic/";
-const address = "43 Waverley Rd, Kenilworth CV8 1JL";
-const smoothEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
-const fadeIn = {
-  initial: { opacity: 0, y: 28 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-90px" },
-  transition: { duration: 0.75, ease: smoothEase },
-};
-
-const heroImages = [
+const symptomGroups = [
   {
-    src: "/new images/1.jpg",
-    alt: "A private one-to-one therapy conversation in a calm room",
-    label: "Personal support",
-    caption: "Private conversations shaped around your needs and recovery goals.",
+    level: "Mild symptoms",
+    timing: "Often begin within 6–12 hours",
+    icon: Activity,
+    tone: "mild",
+    symptoms: ["Anxiety or restlessness", "Sweating", "Insomnia or disturbed sleep", "Headache", "Irritability"],
   },
   {
-    src: "/new images/2.jpg",
-    alt: "A peaceful waterside setting surrounded by mature trees",
-    label: "Space to breathe",
-    caption: "A calmer environment with room to pause, reflect and reset.",
+    level: "Moderate symptoms",
+    timing: "May intensify over 12–48 hours",
+    icon: Thermometer,
+    tone: "moderate",
+    symptoms: ["Tremors or shaking", "Nausea or vomiting", "Increased heart rate", "Raised blood pressure", "Difficulty concentrating"],
   },
   {
-    src: "/new images/3.jpg",
-    alt: "Steps leading through a peaceful autumn landscape",
-    label: "Steps forward",
-    caption: "Recovery approached one manageable, supported step at a time.",
-  },
-  {
-    src: "/new images/care_alcohol_rehab_warwickshire.jpg",
-    alt: "A quiet tree-lined path covered with autumn leaves",
-    label: "A restorative setting",
-    caption: "Natural surroundings that offer a little distance from daily pressures.",
-  },
-  {
-    src: "/images/clinic-room.jpg",
-    alt: "A private room at The Wellbourne Clinic",
-    label: "Private rooms",
-    caption: "Comfortable spaces that feel settled before care begins.",
-  },
-  {
-    src: "/images/clinic-lounge.jpg",
-    alt: "A calm lounge space at The Wellbourne Clinic",
-    label: "Residential calm",
-    caption: "Shared spaces designed for privacy, routine and quiet support.",
+    level: "Severe symptoms",
+    timing: "Require urgent medical attention",
+    icon: TriangleAlert,
+    tone: "severe",
+    symptoms: ["Hallucinations", "Seizures", "Delirium tremens (DTs)", "Severe confusion or agitation", "High temperature"],
   },
 ];
 
-const heroProofs = [
+const timeline = [
   {
-    title: "Private",
-    text: "Discreet enquiries, confidential conversations and a calmer first step.",
-    icon: LockKeyhole,
+    time: "First 24 hours",
+    title: "Early withdrawal",
+    icon: Clock3,
+    text: "Early alcohol withdrawal symptoms may begin around 6–12 hours after the last drink. Anxiety, sweating, headache, nausea, poor sleep and mild tremors are common. Symptoms may appear sooner in people who drink heavily or regularly.",
+    note: "An early medical assessment can identify factors linked with a more difficult withdrawal.",
   },
   {
-    title: "Residential",
-    text: "Structured care in a comfortable setting away from daily triggers.",
-    icon: Home,
+    time: "Days 2–3",
+    title: "Peak risk period",
+    icon: TriangleAlert,
+    text: "Many people find symptoms are strongest during the second and third days. Tremors, agitation, vomiting, a rapid pulse or confusion may worsen. Seizures and delirium tremens are uncommon but potentially life-threatening complications.",
+    note: "This stage may require close observation and medication during a medically assisted alcohol detox.",
   },
   {
-    title: "Personal",
-    text: "Treatment planning shaped around your history, needs and recovery goals.",
+    time: "Days 4–7",
+    title: "Physical symptoms ease",
+    icon: Activity,
+    text: "For many people, the acute physical symptoms start to settle. Sleep, appetite, energy and mood can remain unsettled, while anxiety and cravings may continue even as shaking and nausea improve.",
+    note: "Hydration, nutrition, sleep and a planned transition into alcohol addiction treatment remain important.",
+  },
+  {
+    time: "Week 2 and beyond",
+    title: "Ongoing recovery",
     icon: Sparkles,
+    text: "The main detox period may be over, but disrupted sleep, low mood, irritability or cravings can continue. These longer-lasting effects vary and do not mean that treatment has failed.",
+    note: "Alcohol rehab and detox work best as connected stages, with therapy and aftercare following physical stabilisation.",
   },
 ];
 
-const faqCardMessages = ["Talk to us now", "We are here to Help"];
-
-const dayModes = [
-  {
-    id: "pre-dawn",
-    label: "Pre-dawn",
-    icon: Moon,
-    background:
-      "linear-gradient(180deg, #090d22 0%, #1c1d4a 44%, #4d3f77 100%)",
-    glow: "rgba(113, 93, 255, 0.44)",
-    line: "rgba(153, 136, 255, 0.42)",
-    node: "#c8bcff",
-    accent: "#9f8cff",
-  },
-  {
-    id: "early-morning",
-    label: "Early morning",
-    icon: Sunrise,
-    background:
-      "linear-gradient(180deg, #dceaff 0%, #f6e7d2 45%, #f4b48f 100%)",
-    glow: "rgba(241, 152, 133, 0.5)",
-    line: "rgba(155, 105, 255, 0.34)",
-    node: "#7b4cff",
-    accent: "#f19885",
-  },
-  {
-    id: "midday",
-    label: "Midday",
-    icon: Sun,
-    background:
-      "linear-gradient(180deg, #eef8ff 0%, #d9f1f0 48%, #fff0bf 100%)",
-    glow: "rgba(255, 203, 104, 0.42)",
-    line: "rgba(48, 112, 194, 0.32)",
-    node: "#2f74c0",
-    accent: "#e4a431",
-  },
-  {
-    id: "sunset",
-    label: "Sunset",
-    icon: Sunset,
-    background:
-      "linear-gradient(180deg, #efe7ff 0%, #dbb8ff 44%, #f5a983 100%)",
-    glow: "rgba(241, 152, 133, 0.62)",
-    line: "rgba(77, 55, 210, 0.38)",
-    node: "#4c37d2",
-    accent: "#f19885",
-  },
-  {
-    id: "night",
-    label: "Night",
-    icon: Moon,
-    background:
-      "linear-gradient(180deg, #030711 0%, #071326 52%, #11243a 100%)",
-    glow: "rgba(81, 145, 255, 0.32)",
-    line: "rgba(118, 174, 255, 0.38)",
-    node: "#9fc9ff",
-    accent: "#7ab0ff",
-  },
+const comparisons = [
+  ["Purpose", "Manage withdrawal and reduce immediate medical risk", "Support sustained change and reduce the risk of relapse"],
+  ["Timescale", "Usually several days, depending on individual risk", "Often several weeks or longer, depending on need"],
+  ["Therapy", "Brief emotional support; therapy is not the main focus", "Individual and group work addressing behaviour, triggers and wellbeing"],
+  ["Medical support", "Observation and medication where clinically appropriate", "Continuing health support alongside therapeutic care"],
+  ["Daily experience", "Regular checks, rest and management of changing symptoms", "Structured therapy, education, reflection and recovery activities"],
+  ["Setting", "May be community-based, hospital-based or residential", "May be outpatient or residential alcohol rehab"],
+  ["Aftercare", "A clear handover into the next stage of treatment", "Ongoing therapy, support networks and relapse-prevention planning"],
 ];
 
-const recoveryFieldNodes = Array.from({ length: 118 }, (_, index) => {
-  const progress = index / 117;
-  const angle = -166 + progress * 152 + Math.sin(index * 1.72) * 8;
-  const distance = 96 + ((index * 37) % 280) + Math.sin(index * 0.8) * 24;
-  const radians = (angle * Math.PI) / 180;
-  const x = 450 + Math.cos(radians) * distance;
-  const y = 420 + Math.sin(radians) * distance;
-
-  return {
-    id: index,
-    x,
-    y,
-    opacity: 0.22 + ((index * 17) % 54) / 100,
-    width: index % 6 === 0 ? 1.3 : 0.72,
-    radius: index % 9 === 0 ? 3.1 : index % 4 === 0 ? 2.3 : 1.7,
-    delay: (index % 18) * 0.12,
-  };
-});
-
-const trustCards = [
-  {
-    title: "Private from the first call",
-    text: "Your enquiry stays confidential. We’ll listen without judgement and help you understand your options.",
-    icon: LockKeyhole,
-  },
-  {
-    title: "Expert care, clearly explained",
-    text: "Our experienced team plans detox and treatment around your health, circumstances and recovery goals.",
-    icon: Stethoscope,
-  },
-  {
-    title: "A calm place to recover",
-    text: "Our comfortable residential setting gives you space away from everyday pressures, with support close by.",
-    icon: Home,
-  },
-  {
-    title: "Built around the person",
-    text: "We see you as a person, not an addiction. Your treatment and aftercare are shaped around what you need.",
-    icon: HeartHandshake,
-  },
-];
-
-const googleReviews = [
-  {
-    name: "Thom Sundblad",
-    meta: "Local Guide • 36 reviews • 55 photos",
-    date: "9 weeks ago",
-    quote: "Excellent staff and excellent therapy. I highly recommend Wellbourne.",
-  },
-  {
-    name: "Paul B",
-    meta: "1 review • 0 photos",
-    date: "12 weeks ago",
-    quote:
-      "The Wellbourne Clinic has truly given me the opportunity to turn my life around and I cannot recommend them enough.",
-  },
-  {
-    name: "Rob Jenkins",
-    meta: "3 reviews • 1 photo",
-    date: "16 weeks ago",
-    quote:
-      "Where do I start regarding my stay at The Wellbourne Clinic? It was a truly excellent experience.",
-  },
-  {
-    name: "Darren Gilbert",
-    meta: "1 review • 0 photos",
-    date: "17 weeks ago",
-    quote:
-      "The Wellbourne Clinic is the place to be if you want to sort your life out. I spent 5 weeks there.",
-  },
-  {
-    name: "Aj",
-    meta: "5 reviews • 0 photos",
-    date: "19 weeks ago",
-    quote:
-      "Thank you all at The Wellbourne Clinic for everything you have done for me mentally. The care and compassion...",
-  },
-  {
-    name: "tyler higginson",
-    meta: "1 review • 0 photos",
-    date: "22 weeks ago",
-    quote:
-      "I can’t put it into words how much I feel this place has helped me.",
-  },
-  {
-    name: "Stephen Hodgkiss",
-    meta: "2 reviews • 0 photos",
-    date: "26 weeks ago",
-    quote:
-      "Can't recommend the Wellbourne Clinic any higher. The staff are extremely knowledgeable and helpful.",
-  },
-  {
-    name: "Tracey Palmer",
-    meta: "5 reviews • 6 photos",
-    date: "34 weeks ago",
-    quote:
-      "Brilliant place. My partner went to many rehabs and constantly relapsed. He’s now 2 years sober and loving life again.",
-  },
-  {
-    name: "Steph Kinson",
-    meta: "1 review • 0 photos",
-    date: "35 weeks ago",
-    quote:
-      "Absolutely amazing staff, felt completely at home. Great atmosphere, food is outstanding, cannot recommend them enough.",
-  },
-];
-
-const supportLinks = [
-  {
-    title: "The Clinic",
-    text: "Explore The Wellbourne Clinic, our setting and the care available.",
-    href: "https://thewellbourneclinic.co.uk/",
-  },
-  {
-    title: "Alcohol Rehab",
-    text: "Private residential care, therapy and practical support for lasting recovery.",
-    href: "https://thewellbourneclinic.co.uk/alcohol-rehab/",
-  },
-  {
-    title: "Alcohol Detox",
-    text: "Understand medically informed alcohol detox and withdrawal support.",
-    href: "https://thewellbourneclinic.co.uk/alcohol-detox/",
-  },
-  {
-    title: "Private Drug Rehab Near Me",
-    text: "Confidential residential drug rehab with care shaped around the whole person.",
-    href: "https://thewellbourneclinic.co.uk/drug-rehab/",
-  },
-  {
-    title: "Drug Detox",
-    text: "Find out how drug detox can be supported in a safer residential setting.",
-    href: "https://thewellbourneclinic.co.uk/drug-detox/",
-  },
-];
-
-const treatmentSteps = [
-  {
-    title: "A private first conversation",
-    text: "We’ll listen to what’s happening, answer your questions and understand the support you may need.",
-  },
-  {
-    title: "Supported detox",
-    text: "If detox is needed, it’s planned around your health and withdrawal symptoms, with comfort and safety in mind.",
-  },
-  {
-    title: "Therapy and understanding",
-    text: "One-to-one and group therapy help you understand patterns, recognise triggers and find practical ways forward.",
-  },
-  {
-    title: "Recovery planning",
-    text: "Together, we’ll build a realistic plan for daily life, relationships, wellbeing and preventing relapse.",
-  },
-  {
-    title: "Ongoing support",
-    text: "Support doesn’t stop when treatment ends. Aftercare helps you stay connected to your recovery.",
-  },
-];
-
-const reasons = [
-  {
-    title: "Small enough to be known",
-    text: "With a small number of residents, our team can get to know you and provide more personal support.",
-    icon: Users,
-  },
-  {
-    title: "Privacy and a steady routine",
-    text: "Your days have a clear structure, with time for therapy, rest, reflection and connection.",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Care beyond detox",
-    text: "Detox is only one part of recovery. We help you prepare for life after treatment and the challenges it may bring.",
-    icon: BadgeCheck,
-  },
-  {
-    title: "A welcoming environment",
-    text: "Comfortable rooms, shared spaces and compassionate conversations help you feel safe and supported.",
-    icon: Sparkles,
-  },
-];
-
-const articles = [
-  {
-    title: "The Wellbourne Clinic individual addiction recovery",
-    category: "Recovery approach",
-    readTime: "Featured",
-    image: "/images/article-detox.jpg",
-    text: "How personal treatment planning shapes care at The Wellbourne Clinic.",
-    href: "https://thewellbourneclinic.co.uk/the-wellbourne-clinic-individual-addiction-recovery/",
-    tone: "from-[#12352f]/10 via-[#12352f]/18 to-[#07120f]/90",
-  },
-  {
-    title: "The 12 steps of recovery explained",
-    category: "Recovery guide",
-    readTime: "Popular",
-    image: "/images/article-withdrawal.jpg",
-    text: "A clear introduction to the 12-step model and how it supports change.",
-    href: "https://thewellbourneclinic.co.uk/the-12-steps-of-recovery-explained/",
-    tone: "from-[#283241]/10 via-[#283241]/20 to-[#080b12]/90",
-  },
-  {
-    title: "Replace drink: healthier ways to relax",
-    category: "Alcohol support",
-    readTime: "Popular",
-    image: "/images/article-rehab.jpg",
-    text: "Practical alternatives for winding down without relying on alcohol.",
-    href: "https://thewellbourneclinic.co.uk/replace-drink-healthier-ways-relax/",
-    tone: "from-[#472f21]/10 via-[#472f21]/24 to-[#120905]/90",
-  },
-  {
-    title: "Alcohol Dependence: understanding the signs",
-    category: "Alcohol education",
-    readTime: "Popular",
-    image: "/images/article-inpatient.jpg",
-    text: "A plain-English guide to alcohol dependence, addiction and when support may help.",
-    href: "https://thewellbourneclinic.co.uk/alcohol-addiction-vs-dependence-differences/",
-    tone: "from-[#1f3848]/10 via-[#1f3848]/22 to-[#071018]/90",
-  },
-  {
-    title: "Alcohol detox and rehab services",
-    category: "Start here",
-    readTime: "Core page",
-    image: "/images/article-help.jpg",
-    text: "Explore the main Wellbourne Clinic website for treatment options and next steps.",
-    href: "https://thewellbourneclinic.co.uk/alcohol-rehab/",
-    tone: "from-[#3d3325]/10 via-[#3d3325]/18 to-[#14100b]/90",
-  },
+const guides = [
+  { title: "Alcohol Withdrawal Symptoms", label: "Symptoms guide", icon: Activity, href: "#symptoms", image: "/images/article-withdrawal.jpg", description: "Recognise common physical and psychological symptoms, from anxiety and sweating to severe complications." },
+  { title: "Alcohol Withdrawal Timeline", label: "Timeline guide", icon: Clock3, href: "#timeline", image: "/images/article-detox.jpg", description: "A stage-by-stage guide to what may happen during the first hours, first week and beyond." },
+  { title: "Home Detox vs Residential Detox", label: "Compare options", icon: Home, href: "#detox-vs-rehab", image: "/images/clinic-room.jpg", description: "Understand when a home alcohol detox may be considered and when residential alcohol detox may be safer." },
+  { title: "Can You Quit Alcohol Cold Turkey?", label: "Safety guide", icon: TriangleAlert, href: "https://thewellbourneclinic.co.uk/can-you-quit-cold-turkey/", image: "/images/article-help.jpg", description: "Why abruptly stopping alcohol can be dangerous when physical dependence has developed." },
+  { title: "Detox vs Rehab", label: "Treatment guide", icon: Droplets, href: "#detox-vs-rehab", image: "/images/article-rehab.jpg", description: "How short-term withdrawal management differs from longer-term therapy and recovery support." },
+  { title: "Life After Rehab", label: "Recovery guide", icon: Sparkles, href: "https://thewellbourneclinic.co.uk/life-after-rehab-support-aftercare/", image: "/new images/3.jpg", description: "Preparing for routines, relationships, triggers and continued support after residential treatment." },
+  { title: "The Importance Of Aftercare", label: "Aftercare guide", icon: BadgeCheck, href: "https://thewellbourneclinic.co.uk/the-importance-of-aftercare-in-rehab-building-a-lasting-recovery/", image: "/new images/care_alcohol_rehab_warwickshire.jpg", description: "How ongoing therapy, peer support and relapse-prevention planning can strengthen recovery." },
+  { title: "Alcohol Rehab Success Rates", label: "Evidence guide", icon: BookOpen, href: "#questions", image: "/images/article-inpatient.jpg", description: "Why outcomes depend on individual needs, treatment engagement, continuing care and how success is measured." },
 ];
 
 const faqs = [
   {
-    question: "How can I find Alcohol Rehab Near Me?",
+    question: "How long does alcohol detox take?",
     answer:
-      "You may want care that is easy to reach while still giving you privacy and space from everyday pressures. The Wellbourne Clinic is a private residential alcohol rehab in Kenilworth, Warwickshire, with access from Birmingham and across the UK. We’ll talk through whether our setting and support are right for you.",
+      "Acute alcohol detox is typically completed within 7 to 10 days, though some guidance allows for a wider window of 3 to 10 days depending on the severity of dependence and any complications. Drinking history, physical health, previous withdrawal, medication and the level of dependence can all affect the process. Sleep problems, anxiety, low mood or cravings may continue after the main physical symptoms have eased. Source: NICE clinical guideline CG100; NHS Trust alcohol detoxification protocols.",
   },
   {
-    question: "What does Private Rehab UK treatment include?",
+    question: "What are the symptoms of alcohol withdrawal?",
     answer:
-      "Private rehab in the UK can include a personal assessment, supported detox when needed, one-to-one and group therapy, a structured residential routine and aftercare planning. At Wellbourne, your programme is built around you rather than a one-size-fits-all approach.",
+      "Mild alcohol withdrawal symptoms can include anxiety, sweating, headache and insomnia. Moderate symptoms may include tremors, nausea, vomiting and an increased heart rate. Severe symptoms include hallucinations, seizures and delirium tremens. Symptoms can change quickly, so personal medical advice is important.",
   },
   {
-    question: "How much does rehab cost?",
+    question: "Can alcohol withdrawal kill you?",
     answer:
-      "The cost depends on the length of your stay and the support you need. A confidential conversation lets us explain the options and costs clearly, with no pressure to make an immediate decision.",
+      "Yes. Although many withdrawals are mild or moderate, severe alcohol withdrawal can cause seizures, dangerous changes in heart rate or blood pressure, and delirium tremens. These complications can be fatal without prompt treatment. Call 999 if someone has a seizure, severe confusion, hallucinations, collapse or rapidly worsening symptoms.",
   },
   {
-    question: "How long does detox take?",
+    question: "Is a home alcohol detox safe?",
     answer:
-      "Alcohol detox often takes several days, but the exact timescale varies. Drinking history, physical health, medication needs and previous withdrawal symptoms can all affect the plan.",
+      "A home alcohol detox may be suitable for some people, but only after an appropriate assessment and with a clear treatment plan, reliable support and access to professional help. It is generally unsuitable where there is a history of seizures or delirium tremens, significant physical or mental illness, pregnancy, very heavy drinking or an unsafe home environment.",
   },
   {
-    question: "Is treatment confidential?",
+    question: "What is delirium tremens?",
     answer:
-      "Yes. Your enquiry and treatment are handled privately. We want you to feel safe enough to speak openly, ask questions and take the next step at your own pace.",
+      "Delirium tremens, often shortened to DTs, is the most severe form of alcohol withdrawal. It can involve profound confusion, agitation, hallucinations, fever, sweating and changes in heart rate or blood pressure. It is a medical emergency and requires urgent hospital treatment.",
   },
   {
-    question: "Can family members be involved?",
+    question: "How long does alcohol rehab last?",
     answer:
-      "Family involvement can be helpful when it is appropriate and agreed with the person in treatment. The team can also offer guidance to relatives who are worried about someone they love.",
+      "The appropriate length of rehab depends on the person, the severity and duration of alcohol use, physical and mental health, home circumstances and recovery goals. Residential programmes often last several weeks, while continuing therapy and aftercare may extend for months. A longer stay is not automatically better; the quality and continuity of treatment matter.",
   },
   {
-    question: "What happens after rehab?",
+    question: "What happens after alcohol detox?",
     answer:
-      "Before you leave, we’ll help you build a recovery plan for ongoing support, daily routines, relationships and relapse prevention. Recovery is a journey, and support shouldn’t simply end when your residential stay does.",
+      "Detox is usually the beginning rather than the end of alcohol addiction treatment. Once withdrawal is under control, the next stage may include residential or outpatient rehab, one-to-one and group therapy, work on triggers and coping strategies, family support, relapse-prevention planning and continuing aftercare.",
+  },
+  {
+    question: "What is the difference between detox and rehab?",
+    answer:
+      "Detox focuses on the short-term physical process of stopping alcohol and managing withdrawal safely. Rehab addresses the psychological, behavioural and social aspects of alcohol dependence through therapy, education, structure and practical recovery planning. Alcohol rehab and detox are often most effective when they form one connected treatment pathway.",
+  },
+  {
+    question: "Can family members help during detox and recovery?",
+    answer:
+      "Yes. Family members can help someone seek an assessment, follow a treatment plan and maintain a calm, alcohol-free environment. They can also learn how to respond to warning signs and support healthy boundaries after treatment. A relative should not be expected to manage severe withdrawal at home; seizures, hallucinations or severe confusion require urgent medical help.",
   },
 ];
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+const programmeLengths = [
+  { value: "7", unit: "days", label: "Short stabilisation" },
+  { value: "14", unit: "days", label: "Extended detox support" },
+  { value: "28", unit: "days", label: "Common rehab programme" },
+  { value: "90", unit: "days", label: "Longer-term treatment" },
+];
+
+const recoveryJourney = [
+  { title: "Recognition", icon: Eye, text: "Noticing that alcohol is affecting health, relationships or daily life." },
+  { title: "Assessment", icon: ClipboardCheck, text: "Understanding risk, needs and the safest treatment setting." },
+  { title: "Detox", icon: Droplets, text: "Managing withdrawal and supporting physical stabilisation." },
+  { title: "Therapy", icon: Brain, text: "Exploring triggers and building practical coping strategies." },
+  { title: "Aftercare", icon: Users, text: "Continuing support as everyday routines and responsibilities return." },
+  { title: "Long-term recovery", icon: Sparkles, text: "Strengthening wellbeing, connection and relapse-prevention skills." },
+];
+
+function Logo() {
   return (
-    <p className="mb-5 inline-flex rounded-full border border-graphite/10 bg-white/70 px-4 py-2 text-sm font-semibold text-brand-ink shadow-sm backdrop-blur">
-      {children}
-    </p>
+    <a href="#top" className="flex items-center gap-3" aria-label="Alcohol Rehab Detox home">
+      <Image
+        src="/mainlogo.png"
+        alt="The Wellbourne Clinic"
+        width={220}
+        height={33}
+        priority
+        className="h-auto w-[184px] sm:w-[210px]"
+      />
+      <span className="hidden border-l border-graphite/15 pl-3 text-[10px] font-bold uppercase leading-4 tracking-[0.16em] text-muted xl:block">
+        Alcohol detox
+        <br />
+        reference
+      </span>
+    </a>
   );
 }
 
-function SectionHeading({
+function SectionIntro({
   eyebrow,
   title,
   text,
-  align = "center",
 }: {
   eyebrow: string;
   title: string;
   text: string;
-  align?: "center" | "left";
 }) {
   return (
-    <motion.div
-      {...fadeIn}
-      className={align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-5xl"}
-    >
-      <SectionLabel>{eyebrow}</SectionLabel>
-      <h2 className="text-balance break-words font-heading text-[2.15rem] font-semibold leading-[1.04] tracking-[-0.04em] text-graphite md:text-[4rem] md:tracking-[-0.045em]">
+    <div className="max-w-3xl">
+      <p className="medical-eyebrow">{eyebrow}</p>
+      <h2 className="mt-4 text-balance text-[clamp(2rem,4.5vw,3.75rem)] font-bold leading-[1.02] tracking-[-0.045em] text-graphite">
         {title}
       </h2>
-      <p className="mt-5 max-w-4xl text-pretty text-lg leading-8 text-muted md:text-xl">
-        {text}
-      </p>
+      <p className="mt-5 max-w-2xl text-lg leading-8 text-muted">{text}</p>
+    </div>
+  );
+}
+
+function Reveal({
+  children,
+  className = "",
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className={className}
+      initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-70px" }}
+      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
     </motion.div>
   );
 }
 
-function GoogleLogo({ className = "" }: { className?: string }) {
+function InfoPanel({
+  label,
+  children,
+  icon: Icon,
+  tone = "fact",
+}: {
+  label: string;
+  children: React.ReactNode;
+  icon: typeof Info;
+  tone?: "fact" | "important" | "recovery";
+}) {
   return (
-    <svg
-      viewBox="0 0 48 48"
-      aria-hidden="true"
-      focusable="false"
-      className={className}
-    >
-      <path
-        fill="#4285F4"
-        d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.52h11.84a10.12 10.12 0 0 1-4.4 6.64v5.52h7.12c4.16-3.84 6.56-9.5 6.56-16.18Z"
-      />
-      <path
-        fill="#34A853"
-        d="M24 46c5.94 0 10.92-1.96 14.56-5.32l-7.12-5.52c-1.98 1.32-4.5 2.1-7.44 2.1-5.74 0-10.6-3.88-12.34-9.08H4.3v5.7A22 22 0 0 0 24 46Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M11.66 28.18A13.22 13.22 0 0 1 10.96 24c0-1.44.25-2.84.7-4.18v-5.7H4.3A22 22 0 0 0 2 24c0 3.54.84 6.9 2.3 9.88l7.36-5.7Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M24 10.74c3.24 0 6.14 1.12 8.42 3.3l6.3-6.3C34.9 4.18 29.92 2 24 2A22 22 0 0 0 4.3 14.12l7.36 5.7C13.4 14.62 18.26 10.74 24 10.74Z"
-      />
-    </svg>
+    <aside className={`info-panel info-panel-${tone}`}>
+      <span className="info-panel-icon"><Icon className="h-5 w-5" /></span>
+      <div>
+        <p className="text-xs font-extrabold uppercase tracking-[0.16em]">{label}</p>
+        <p className="mt-1 text-sm leading-6 text-muted">{children}</p>
+      </div>
+    </aside>
   );
 }
 
 export function WellbourneMicrosite() {
-  const [activeHeroImage, setActiveHeroImage] = useState(0);
-  const [activeSupportImage, setActiveSupportImage] = useState(0);
-  const [activeFaqMessage, setActiveFaqMessage] = useState(0);
-  const [activeReview, setActiveReview] = useState(0);
-  const [activeDayMode, setActiveDayMode] = useState("sunset");
-  const [chatVisibility, setChatVisibility] = useState<
-    "maximized" | "minimized"
-  >("minimized");
-  const [isReviewPaused, setIsReviewPaused] = useState(false);
-  const [isArticleRailPaused, setIsArticleRailPaused] = useState(false);
-  const articleRailRef = useRef<HTMLDivElement>(null);
-  const activeDay =
-    dayModes.find((mode) => mode.id === activeDayMode) ?? dayModes[3];
-  const ActiveDayIcon = activeDay.icon;
-  const isDarkDayMode =
-    activeDayMode === "pre-dawn" || activeDayMode === "night";
-  const openLiveChat = () => setChatVisibility("maximized");
-  const shouldReduceMotion = useReducedMotion();
-  const { scrollY, scrollYProgress } = useScroll();
-  const progressScaleX = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 28,
-    restDelta: 0.001,
-  });
-  const headerBackground = useTransform(
-    scrollY,
-    [0, 180],
-    ["rgba(247, 244, 238, 0.72)", "rgba(247, 244, 238, 0.9)"],
-  );
-  const headerShadow = useTransform(
-    scrollY,
-    [0, 180],
-    ["0 0 0 rgba(17,24,39,0)", "0 18px 50px rgba(17,24,39,0.08)"],
-  );
-  const heroPointerX = useMotionValue(0);
-  const heroPointerY = useMotionValue(0);
-  const heroRotateX = useSpring(
-    useTransform(heroPointerY, [-1, 1], shouldReduceMotion ? [0, 0] : [2.2, -2.2]),
-    { stiffness: 140, damping: 22 },
-  );
-  const heroRotateY = useSpring(
-    useTransform(heroPointerX, [-1, 1], shouldReduceMotion ? [0, 0] : [-2.8, 2.8]),
-    { stiffness: 140, damping: 22 },
-  );
-  const heroImageX = useSpring(
-    useTransform(heroPointerX, [-1, 1], shouldReduceMotion ? [0, 0] : [-10, 10]),
-    { stiffness: 120, damping: 24 },
-  );
-  const heroImageY = useSpring(
-    useTransform(heroPointerY, [-1, 1], shouldReduceMotion ? [0, 0] : [-8, 8]),
-    { stiffness: 120, damping: 24 },
-  );
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleHeroPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (shouldReduceMotion) {
-      return;
-    }
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    heroPointerX.set(((event.clientX - rect.left) / rect.width - 0.5) * 2);
-    heroPointerY.set(((event.clientY - rect.top) / rect.height - 0.5) * 2);
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
   };
-
-  const resetHeroPointer = () => {
-    heroPointerX.set(0);
-    heroPointerY.set(0);
-  };
-
-  const handleSpotlightMove = (event: React.PointerEvent<HTMLElement>) => {
-    if (shouldReduceMotion) {
-      return;
-    }
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    event.currentTarget.style.setProperty(
-      "--spotlight-x",
-      `${event.clientX - rect.left}px`,
-    );
-    event.currentTarget.style.setProperty(
-      "--spotlight-y",
-      `${event.clientY - rect.top}px`,
-    );
-  };
-
-  const showPreviousReview = () => {
-    setActiveReview((current) =>
-      current === 0 ? googleReviews.length - 1 : current - 1,
-    );
-  };
-
-  const showNextReview = () => {
-    setActiveReview((current) => (current + 1) % googleReviews.length);
-  };
-
-  useEffect(() => {
-    if (shouldReduceMotion) {
-      return undefined;
-    }
-
-    const timer = window.setInterval(() => {
-      setActiveHeroImage((current) => (current + 1) % heroImages.length);
-    }, 4500);
-
-    return () => window.clearInterval(timer);
-  }, [shouldReduceMotion]);
-
-  useEffect(() => {
-    if (shouldReduceMotion || isReviewPaused) {
-      return undefined;
-    }
-
-    const timer = window.setInterval(() => {
-      setActiveReview((current) => (current + 1) % googleReviews.length);
-    }, 4800);
-
-    return () => window.clearInterval(timer);
-  }, [isReviewPaused, shouldReduceMotion]);
-
-  useEffect(() => {
-    if (shouldReduceMotion) {
-      return undefined;
-    }
-
-    const timer = window.setInterval(() => {
-      setActiveSupportImage((current) => (current + 1) % heroImages.length);
-    }, 5200);
-
-    return () => window.clearInterval(timer);
-  }, [shouldReduceMotion]);
-
-  useEffect(() => {
-    if (shouldReduceMotion || isArticleRailPaused) {
-      return undefined;
-    }
-
-    const rail = articleRailRef.current;
-    if (!rail) {
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      const firstCard = rail.querySelector<HTMLElement>(".article-card");
-      const scrollDistance = firstCard
-        ? firstCard.offsetWidth + 28
-        : Math.round(rail.clientWidth * 0.82);
-      const halfway = rail.scrollWidth / 2;
-
-      if (rail.scrollLeft >= halfway - scrollDistance) {
-        rail.scrollTo({ left: 0, behavior: "auto" });
-      } else {
-        rail.scrollBy({ left: scrollDistance, behavior: "smooth" });
-      }
-    }, 2000);
-
-    return () => window.clearInterval(timer);
-  }, [isArticleRailPaused, shouldReduceMotion]);
-
-  useEffect(() => {
-    if (shouldReduceMotion) {
-      return undefined;
-    }
-
-    const timer = window.setInterval(() => {
-      setActiveFaqMessage((current) => (current + 1) % faqCardMessages.length);
-    }, 3600);
-
-    return () => window.clearInterval(timer);
-  }, [shouldReduceMotion]);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-cream text-graphite">
-      <motion.header
-        className="fixed left-0 right-0 top-0 z-50 border-b border-white/55 backdrop-blur-2xl"
-        style={{ backgroundColor: headerBackground, boxShadow: headerShadow }}
-      >
-        <motion.div
-          aria-hidden="true"
-          className="absolute bottom-[-1px] left-0 h-px w-full origin-left bg-gradient-to-r from-transparent via-brand to-transparent"
-          style={{ scaleX: progressScaleX }}
-        />
-        <nav
-          aria-label="Primary navigation"
-          className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8"
-        >
-          <a
-            href="#top"
-            className="group rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
-          >
-            <Image
-              src="/mainlogo.png"
-              alt="The Wellbourne Clinic"
-              width={280}
-              height={42}
-              className="h-auto w-[210px] transition duration-300 group-hover:opacity-80 sm:w-[280px]"
-              priority
-            />
-          </a>
-          <div className="hidden items-center gap-7 text-sm font-medium text-muted lg:flex">
-            <a href="#help" className="transition hover:text-graphite">
-              Support
+    <main id="top" className="min-h-screen overflow-hidden bg-cream text-graphite">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+
+      <div className="bg-graphite px-5 py-2.5 text-center text-xs font-medium text-white/80">
+        <span className="inline-flex items-center gap-2">
+          <Info className="h-3.5 w-3.5 text-brand" />
+          If someone is having a seizure, hallucinations or severe confusion, call 999.
+        </span>
+      </div>
+
+      <header className="sticky top-0 z-50 border-b border-graphite/10 bg-cream/95 backdrop-blur-xl">
+        <div className="page-shell flex h-[78px] items-center justify-between">
+          <Logo />
+          <nav className="hidden items-center gap-7 text-sm font-semibold text-graphite/70 lg:flex" aria-label="Main navigation">
+            <a className="nav-item" href="#understanding">Understanding detox</a>
+            <a className="nav-item" href="#symptoms">Symptoms</a>
+            <a className="nav-item" href="#timeline">Timeline</a>
+            <a className="nav-item" href="#questions">Questions</a>
+          </nav>
+          <div className="hidden items-center gap-3 sm:flex">
+            <a className="inline-flex min-h-11 items-center gap-2 rounded-full border border-graphite/15 bg-white px-5 text-sm font-bold transition hover:border-brand hover:text-brand-ink" href={phoneHref}>
+              <Phone className="h-4 w-4 text-brand" /> {phoneNumber}
             </a>
-            <a href="#treatment" className="transition hover:text-graphite">
-              Journey
-            </a>
-            <a href="#articles" className="transition hover:text-graphite">
-              Advice
-            </a>
-            <a href="#faqs" className="transition hover:text-graphite">
-              FAQs
+            <a className="hidden min-h-11 items-center rounded-full bg-brand px-5 text-sm font-bold text-white shadow-[0_9px_24px_rgba(241,152,133,.28)] transition hover:-translate-y-0.5 hover:bg-[#e88975] xl:inline-flex" href="#final-cta">
+              Find support
             </a>
           </div>
-          <Button type="button" size="sm" onClick={openLiveChat} className="px-5">
-              <span className="hidden sm:inline">Speak privately</span>
-              <span className="sm:hidden">Chat</span>
-              <MessageCircle className="h-4 w-4" />
-          </Button>
-        </nav>
-      </motion.header>
-
-      <section id="top" className="relative px-5 pb-20 pt-32 md:px-8 md:pb-28">
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="soft-grid absolute inset-x-0 top-0 h-[720px] opacity-50" />
-          <div className="absolute left-1/2 top-20 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-brand/10 blur-3xl" />
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            className="grid h-11 w-11 place-items-center rounded-full border border-graphite/15 bg-white sm:hidden"
+            aria-expanded={menuOpen}
+            aria-label="Toggle navigation"
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
-        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[0.95fr_1.05fr]">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.85, ease: smoothEase }}
-          >
-            <SectionLabel>Private Rehab UK • Kenilworth, Warwickshire</SectionLabel>
-            <h1 className="max-w-5xl text-balance break-words font-heading text-[2.75rem] font-semibold leading-[1] tracking-[-0.052em] text-graphite sm:text-[3.45rem] md:text-[5.35rem] md:leading-[0.98] md:tracking-[-0.06em]">
-              Private Alcohol Rehab with care that sees the whole person.
-            </h1>
-            <p className="mt-7 max-w-2xl text-pretty text-xl leading-9 text-muted">
-              If you’re searching for Alcohol Rehab Near Me, you don’t have to
-              make sense of everything alone. The Wellbourne Clinic offers
-              confidential detox, therapy and residential support in a calm,
-              welcoming setting.
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Button type="button" onClick={openLiveChat}>
-                Speak to our team <MessageCircle className="h-5 w-5" />
-              </Button>
-              <Button asChild variant="secondary">
-                <a href={mainSiteUrl}>
-                  Visit thewellbourneclinic.co.uk <ChevronRight className="h-5 w-5" />
-                </a>
-              </Button>
-            </div>
-            <dl className="mt-12 grid max-w-3xl gap-3 sm:grid-cols-3">
-              {heroProofs.map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-2xl border border-white/80 bg-white/60 p-5 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-white"
-                >
-                  <item.icon className="mb-5 h-5 w-5 text-brand" />
-                  <dt className="text-xl font-semibold tracking-[-0.03em]">
-                    {item.title}
-                  </dt>
-                  <dd className="mt-2 text-sm leading-6 text-muted">
-                    {item.text}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.12, ease: smoothEase }}
-            className="relative"
-            style={{ perspective: 1200 }}
-            onPointerMove={handleHeroPointerMove}
-            onPointerLeave={resetHeroPointer}
-          >
-            <div className="absolute -left-4 top-12 z-10 hidden rounded-2xl border border-white/70 bg-white/80 p-4 shadow-card backdrop-blur md:block">
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-brand-ink">
-                  <ShieldCheck className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                    Enquiries
-                  </p>
-                  <p className="text-sm font-semibold">Handled privately</p>
-                </div>
-              </div>
-            </div>
-            <motion.div
-              className="relative aspect-[4/4.55] overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-soft md:aspect-[4/4.25]"
-              style={{
-                rotateX: heroRotateX,
-                rotateY: heroRotateY,
-                transformStyle: "preserve-3d",
-              }}
-            >
-              {heroImages.map((image, index) => (
-                <motion.div
-                  key={image.src}
-                  initial={false}
-                  animate={{
-                    opacity: activeHeroImage === index ? 1 : 0,
-                    scale: activeHeroImage === index ? 1 : 1.035,
-                  }}
-                  transition={{ duration: 0.9, ease: smoothEase }}
-                  className="absolute inset-0"
-                  style={{
-                    x: heroImageX,
-                    y: heroImageY,
-                  }}
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    className="object-cover"
-                    sizes="(min-width: 1024px) 50vw, 100vw"
-                    priority={index === 0}
-                  />
-                </motion.div>
-              ))}
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,24,39,0)_42%,rgba(17,24,39,0.72)_100%)]" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white md:p-8">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/70">
-                  {heroImages[activeHeroImage].label}
-                </p>
-                <p className="mt-2 max-w-md text-3xl font-semibold leading-tight tracking-[-0.04em]">
-                  {heroImages[activeHeroImage].caption}
-                </p>
-                <div className="mt-6 flex gap-2">
-                  {heroImages.map((image, index) => (
-                    <button
-                      key={image.src}
-                      type="button"
-                      aria-label={`Show ${image.label}`}
-                      onClick={() => setActiveHeroImage(index)}
-                      className={`h-2 rounded-full transition-all ${
-                        activeHeroImage === index
-                          ? "w-8 bg-white"
-                          : "w-2 bg-white/45 hover:bg-white/70"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-            <motion.div
-              animate={{ y: [0, -14, 0] }}
-              transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -bottom-6 right-5 min-w-[214px] rounded-3xl border border-white bg-white p-6 shadow-[0_28px_80px_rgba(17,24,39,0.24)] ring-1 ring-graphite/10"
-            >
-              <div
-                className="flex w-full items-center justify-between text-[#F19885]"
-                aria-hidden="true"
-              >
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Star key={index} className="h-6 w-6 fill-current" />
-                ))}
-              </div>
-              <p className="mt-4 text-base font-extrabold tracking-[-0.02em] text-[#111827]">
-                5-star Google reviews
-              </p>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="px-5 pb-16 md:px-8 md:pb-24">
-        <motion.p
-          {...fadeIn}
-          className="mx-auto max-w-5xl text-center text-2xl font-semibold leading-tight tracking-[-0.035em] text-graphite md:text-4xl"
-        >
-          Contact us today on{" "}
-          <a
-            href={phoneHref}
-            className="text-brand underline decoration-brand/35 underline-offset-8 transition hover:text-[#e88975]"
-          >
-            {phoneNumber}
-          </a>{" "}
-          for a free, confidential conversation. We’ll listen and guide you
-          through your options whenever you’re ready.
-        </motion.p>
-      </section>
-
-      <section className="px-5 py-10 md:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-3 md:grid-cols-4">
-            {trustCards.map((item, index) => (
-              <motion.div
-                key={item.title}
-                {...fadeIn}
-                transition={{ ...fadeIn.transition, delay: index * 0.06 }}
-              >
-                <Card
-                  onPointerMove={handleSpotlightMove}
-                  className="premium-spotlight h-full border-white/80 bg-white/62 shadow-none backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-card"
-                >
-                  <CardContent className="p-6">
-                    <item.icon className="mb-8 h-5 w-5 text-brand" />
-                    <h3 className="text-xl font-semibold tracking-[-0.03em]">
-                      {item.title}
-                    </h3>
-                    <p className="mt-4 text-sm leading-7 text-muted md:text-base">
-                      {item.text}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
+        {menuOpen && (
+          <nav className="page-shell grid gap-1 border-t border-graphite/10 py-4 text-sm font-semibold sm:hidden" aria-label="Mobile navigation">
+            {[
+              ["Understanding detox", "#understanding"],
+              ["Withdrawal symptoms", "#symptoms"],
+              ["Withdrawal timeline", "#timeline"],
+              ["Common questions", "#questions"],
+            ].map(([label, href]) => (
+              <a key={href} href={href} onClick={() => setMenuOpen(false)} className="rounded-xl px-3 py-3 hover:bg-white">
+                {label}
+              </a>
             ))}
-          </div>
-          <motion.div {...fadeIn} className="mt-8 flex justify-center">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={openLiveChat}
-            >
-              Ask a confidential question <MessageCircle className="h-5 w-5" />
-            </Button>
-          </motion.div>
-        </div>
-      </section>
+            <a href={phoneHref} className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-white">
+              <Phone className="h-4 w-4" /> Call {phoneNumber}
+            </a>
+          </nav>
+        )}
+      </header>
 
-      <section className="px-5 py-20 md:px-8 md:py-28">
-        <motion.div
-          {...fadeIn}
-          onPointerEnter={() => setIsReviewPaused(true)}
-          onPointerLeave={() => setIsReviewPaused(false)}
-          onFocus={() => setIsReviewPaused(true)}
-          onBlur={() => setIsReviewPaused(false)}
-          className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.25rem] border border-white/75 bg-[#f4efea] p-5 shadow-soft md:p-8"
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(241,152,133,0.2),transparent_32%),radial-gradient(circle_at_82%_24%,rgba(255,255,255,0.84),transparent_30%)]" />
-          <div className="relative grid gap-8 lg:grid-cols-[0.86fr_1.14fr] lg:items-stretch">
-            <div className="flex flex-col justify-between rounded-[1.75rem] bg-white/58 p-6 backdrop-blur md:p-8">
-              <div>
-                <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-graphite/10 bg-white px-4 py-2 shadow-sm">
-                  <GoogleLogo className="h-5 w-5" />
-                  <span className="text-sm font-bold text-graphite">
-                    Google reviews
-                  </span>
-                </div>
-                <h2 className="max-w-xl text-balance font-heading text-[2.3rem] font-semibold leading-[1.02] tracking-[-0.045em] text-graphite md:text-[4.35rem]">
-                  Real words from people who took the first step.
-                </h2>
-                <p className="mt-5 max-w-lg text-base leading-7 text-muted md:text-lg">
-                  A quieter kind of proof: recent public feedback from people
-                  and families who experienced care at The Wellbourne Clinic.
-                </p>
-              </div>
-              <div className="mt-8 flex flex-wrap items-center gap-3">
-                <Button type="button" onClick={openLiveChat}>
-                  Speak privately <MessageCircle className="h-5 w-5" />
-                </Button>
-                <div
-                  className="flex items-center gap-1 text-brand"
-                  aria-label="Rated 5 stars on Google"
-                >
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <Star key={index} className="h-5 w-5 fill-current" />
-                  ))}
-                </div>
-              </div>
+      <section className="relative border-b border-graphite/10 bg-[linear-gradient(135deg,#f7f4ee_0%,#fffaf4_48%,#f4ebe7_100%)] px-5 py-14 md:py-20 lg:py-24">
+        <div className="hero-grid pointer-events-none absolute inset-0 opacity-45" />
+        <div className="page-shell relative grid gap-12 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-white/75 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-brand-ink shadow-sm backdrop-blur">
+              <ShieldCheck className="h-4 w-4 text-brand" />
+              Clinically informed guidance
             </div>
+            <h1 className="mt-7 max-w-3xl text-balance text-[clamp(2.8rem,6.5vw,5.75rem)] font-extrabold leading-[0.94] tracking-[-0.06em]">
+              Your alcohol detox guide: <span className="text-brand">symptoms, timelines and safe treatment.</span>
+            </h1>
+            <p className="mt-7 max-w-2xl text-lg leading-8 text-muted md:text-xl md:leading-9">
+              Understand alcohol withdrawal symptoms, the detox timeline and when medical support matters — without jargon or judgement.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <a href="#understanding" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-brand px-7 text-base font-bold text-white shadow-[0_14px_36px_rgba(241,152,133,.3)] transition hover:-translate-y-1 hover:bg-[#e88975]">
+                Start with the basics <ArrowRight className="h-4 w-4" />
+              </a>
+              <a href={phoneHref} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-graphite/15 bg-white/85 px-7 text-base font-bold transition hover:-translate-y-1 hover:border-brand">
+                <Phone className="h-4 w-4 text-brand" /> Speak to someone
+              </a>
+            </div>
+            <div className="mt-9 grid max-w-2xl gap-3 text-sm sm:grid-cols-3">
+              {[
+                [Stethoscope, "Medical review"],
+                [LockKeyhole, "Confidential support"],
+                [UserRoundCheck, "Person-centred care"],
+              ].map(([Icon, label]) => {
+                const TrustIcon = Icon as typeof Stethoscope;
+                return (
+                  <div key={label as string} className="flex items-center gap-2 font-semibold text-graphite/70">
+                    <span className="grid h-8 w-8 place-items-center rounded-full bg-white shadow-sm">
+                      <TrustIcon className="h-4 w-4 text-brand" />
+                    </span>
+                    {label as string}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-            <div className="relative min-h-[430px] overflow-hidden rounded-[1.75rem] bg-midnight p-5 text-white shadow-[0_34px_90px_rgba(17,24,39,0.22)] md:p-8">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(241,152,133,0.34),transparent_34%),linear-gradient(145deg,#111827_0%,#08101d_58%,#02040a_100%)]" />
-              <div className="relative flex h-full flex-col justify-between">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white">
-                      <GoogleLogo className="h-7 w-7" />
+          <div className="relative mx-auto w-full max-w-[580px]">
+            <div className="absolute -left-7 top-12 h-28 w-28 rounded-full border-[22px] border-brand/10" />
+            <div className="absolute -right-7 -top-6 h-32 w-32 rounded-full bg-sage/70 blur-2xl" />
+            <div className="relative overflow-hidden rounded-[2rem] border border-white bg-white p-3 shadow-[0_30px_90px_rgba(17,24,39,.14)]">
+              <div className="relative min-h-[440px] overflow-hidden rounded-[1.45rem] bg-[#e9e4dc]">
+                <Image
+                  src="/new images/1.jpg"
+                  alt="A calm private conversation with a care professional"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 45vw"
+                  className="object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-graphite/65 via-transparent to-transparent" />
+                <div className="absolute inset-x-5 bottom-5 rounded-2xl border border-white/20 bg-white/90 p-5 shadow-xl backdrop-blur-md">
+                  <div className="flex items-start gap-4">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand-ink">
+                      <CircleAlert className="h-5 w-5" />
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-white/58">
-                        Public Google review
-                      </p>
-                      <p className="font-semibold">
-                        {googleReviews[activeReview].date}
-                      </p>
+                      <p className="font-bold">Do not stop suddenly if you may be dependent.</p>
+                      <p className="mt-1 text-sm leading-6 text-muted">Withdrawal can be unpredictable. Ask a healthcare professional for advice first.</p>
                     </div>
                   </div>
-                  <div className="hidden items-center gap-1 text-brand sm:flex">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <Star key={index} className="h-5 w-5 fill-current" />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="py-10 md:py-14">
-                  <motion.blockquote
-                    key={googleReviews[activeReview].quote}
-                    initial={
-                      shouldReduceMotion ? false : { opacity: 0, y: 16 }
-                    }
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.55, ease: smoothEase }}
-                    className="max-w-3xl text-[2rem] font-semibold leading-[1.04] tracking-[-0.045em] md:text-[3.65rem]"
-                  >
-                    “{googleReviews[activeReview].quote}”
-                  </motion.blockquote>
-                </div>
-
-                <div className="grid gap-5 md:grid-cols-[1fr_auto] md:items-end">
-                  <div>
-                    <p className="text-2xl font-bold tracking-[-0.035em]">
-                      {googleReviews[activeReview].name}
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-white/55">
-                      {googleReviews[activeReview].meta}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={showPreviousReview}
-                      aria-label="Show previous Google review"
-                      className="flex h-12 w-12 items-center justify-center rounded-full border border-white/12 bg-white/[0.07] text-white transition hover:bg-white hover:text-graphite focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                    >
-                      <ArrowRight className="h-5 w-5 rotate-180" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={showNextReview}
-                      aria-label="Show next Google review"
-                      className="flex h-12 w-12 items-center justify-center rounded-full border border-white/12 bg-white/[0.07] text-white transition hover:bg-white hover:text-graphite focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                    >
-                      <ArrowRight className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mt-8 flex flex-wrap gap-2">
-                  {googleReviews.map((review, index) => (
-                    <button
-                      key={review.name}
-                      type="button"
-                      onClick={() => setActiveReview(index)}
-                      aria-label={`Show Google review from ${review.name}`}
-                      aria-current={activeReview === index}
-                      className={`h-2.5 rounded-full transition-all ${
-                        activeReview === index
-                          ? "w-9 bg-brand"
-                          : "w-2.5 bg-white/25 hover:bg-white/55"
-                      }`}
-                    />
-                  ))}
                 </div>
               </div>
+            </div>
+            <div className="absolute -right-4 top-8 hidden rounded-2xl border border-graphite/10 bg-graphite px-5 py-4 text-white shadow-xl sm:block">
+              <p className="text-2xl font-extrabold text-brand">24/7</p>
+              <p className="mt-1 text-xs font-semibold text-white/65">Support available</p>
             </div>
           </div>
-        </motion.div>
-      </section>
-
-      <section id="help" className="px-5 py-24 md:px-8 md:py-32">
-        <div className="mx-auto max-w-7xl">
-          <SectionHeading
-            eyebrow="Find the support you need"
-            title="Clear information, without pressure or judgement."
-            text="Explore Alcohol Rehab, detox and private drug rehab support. Each page explains what to expect and how we can help."
-          />
-          <motion.div
-            {...fadeIn}
-            className="mt-14 overflow-hidden rounded-[2rem] border border-graphite/10 bg-porcelain shadow-card"
-          >
-            <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
-              <div className="relative min-h-[420px] overflow-hidden">
-                {heroImages.map((image, index) => (
-                  <motion.div
-                    key={image.src}
-                    initial={false}
-                    animate={{
-                      opacity: activeSupportImage === index ? 1 : 0,
-                      scale: activeSupportImage === index ? 1 : 1.035,
-                    }}
-                    transition={{ duration: 0.9, ease: smoothEase }}
-                    className="absolute inset-0"
-                  >
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      fill
-                      className="object-cover"
-                      sizes="(min-width: 1024px) 45vw, 100vw"
-                    />
-                  </motion.div>
-                ))}
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,24,39,0.02)_20%,rgba(17,24,39,0.62)_100%)]" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white md:p-8">
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/70">
-                    {heroImages[activeSupportImage].label}
-                  </p>
-                  <p className="mt-2 max-w-md text-2xl font-semibold leading-tight tracking-[-0.04em]">
-                    {heroImages[activeSupportImage].caption}
-                  </p>
-                </div>
-              </div>
-              <div className="grid content-center gap-3 p-5 md:p-8">
-                {supportLinks.map((item, index) => (
-                  <motion.a
-                    key={item.title}
-                    href={item.href}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, margin: "-80px" }}
-                    transition={{
-                      duration: 0.55,
-                      delay: index * 0.05,
-                      ease: smoothEase,
-                    }}
-                    onPointerMove={handleSpotlightMove}
-                    className="premium-spotlight group flex items-center justify-between gap-5 rounded-2xl border border-graphite/10 bg-white/70 p-5 transition duration-300 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-white"
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-soft text-sm font-semibold text-brand-ink">
-                        0{index + 1}
-                      </span>
-                      <div>
-                        <h3 className="text-xl font-semibold tracking-[-0.03em]">
-                          {item.title}
-                        </h3>
-                        <p className="mt-1 max-w-xl text-sm leading-6 text-muted">
-                          {item.text}
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-brand opacity-0 transition duration-300 group-hover:translate-x-1 group-hover:opacity-100" />
-                  </motion.a>
-                ))}
-                <motion.div
-                  {...fadeIn}
-                  className="pt-3"
-                  transition={{ ...fadeIn.transition, delay: 0.25 }}
-                >
-                  <Button asChild>
-                    <a href={mainSiteUrl}>
-                      Visit the main clinic website <ExternalLink className="h-5 w-5" />
-                    </a>
-                  </Button>
-                </motion.div>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </section>
 
-      <section
-        id="treatment"
-        className="relative overflow-hidden bg-[#05080f] px-5 py-24 text-white md:px-8 md:py-32"
-      >
-        <BackgroundGradientAnimation
-          gradientBackgroundStart="rgb(3, 10, 32)"
-          gradientBackgroundEnd="rgb(0, 5, 18)"
-          firstColor="18, 113, 255"
-          secondColor="105, 82, 255"
-          thirdColor="100, 220, 255"
-          fourthColor="28, 64, 190"
-          fifthColor="78, 145, 255"
-          pointerColor="120, 165, 255"
-          size="82%"
-          blendingValue="hard-light"
-        />
-        <div className="relative mx-auto max-w-7xl">
-          <div className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
-            <motion.div {...fadeIn} className="lg:sticky lg:top-32">
-              <SectionLabel>Treatment journey</SectionLabel>
-              <h2 className="text-balance break-words text-[2.15rem] font-semibold leading-[1.04] tracking-[-0.04em] md:text-[4rem] md:tracking-[-0.045em]">
-                We’ll guide you through every stage of recovery.
-              </h2>
-              <p className="mt-5 text-lg leading-8 text-white/70 md:text-xl">
-                Knowing what happens next can make the first step feel less
-                overwhelming. Your care is explained clearly, shaped around you
-                and supported beyond your residential stay.
+      <section id="understanding" className="px-5 py-20 md:py-28">
+        <div className="page-shell">
+          <div className="grid gap-12 lg:grid-cols-[.82fr_1.18fr] lg:items-start">
+            <div className="lg:sticky lg:top-32">
+              <SectionIntro
+                eyebrow="Understanding alcohol detox"
+                title="Detox helps your body adjust safely."
+                text="Alcohol detox is the process of stopping alcohol while the body adjusts to its absence. If physical dependence has developed, this adjustment can produce withdrawal symptoms because the brain and nervous system have adapted to regular alcohol use."
+              />
+              <p className="mt-5 max-w-xl text-base leading-7 text-muted">
+                Detox allows alcohol to leave the body while symptoms are observed and treated. Some people need medical supervision because it is difficult to predict who will develop severe withdrawal, and risk can be higher after prolonged heavy drinking or previous complicated withdrawals.
               </p>
               <div className="mt-8">
-                <Button type="button" onClick={openLiveChat}>
-                  Start a private enquiry <MessageCircle className="h-5 w-5" />
-                </Button>
+                <InfoPanel label="Did you know?" icon={Info}>
+                  Withdrawal symptoms vary considerably from person to person. The safest alcohol detox treatment depends on drinking history, health, previous withdrawal, medication and support at home.
+                </InfoPanel>
               </div>
-            </motion.div>
-            <div className="grid gap-4">
-              {treatmentSteps.map((step, index) => (
-                <motion.article
-                  key={step.title}
-                  {...fadeIn}
-                  transition={{ ...fadeIn.transition, delay: index * 0.08 }}
-                  onPointerMove={handleSpotlightMove}
-                  className="premium-spotlight premium-spotlight-dark group rounded-[1.5rem] border border-white/14 bg-white/[0.085] p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/[0.13]"
-                >
-                  <div className="flex flex-col gap-5 sm:flex-row">
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-lg font-semibold text-midnight">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <h3 className="text-2xl font-semibold tracking-[-0.04em]">
-                        {step.title}
-                      </h3>
-                      <p className="mt-2 max-w-2xl leading-7 text-white/68">
-                        {step.text}
-                      </p>
-                    </div>
-                  </div>
-                </motion.article>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="px-5 py-24 md:px-8 md:py-32">
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <motion.div {...fadeIn}>
-            <SectionHeading
-              eyebrow="Why Wellbourne"
-              title="Professional expertise, delivered with genuine warmth."
-              text="You’ll find experienced care, a peaceful residential setting and a small team who take time to understand you. We treat the whole person, not just the addiction."
-              align="left"
-            />
-            <div className="mt-10 grid gap-4 sm:grid-cols-2">
-              {reasons.map((reason, index) => (
-                <motion.div
-                  key={reason.title}
-                  {...fadeIn}
-                  transition={{ ...fadeIn.transition, delay: index * 0.05 }}
-                  onPointerMove={handleSpotlightMove}
-                  className="premium-spotlight rounded-[1.4rem] border border-graphite/10 bg-white/65 p-6 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-card"
-                >
-                  <reason.icon className="h-5 w-5 text-brand" />
-                  <h3 className="mt-7 text-xl font-semibold tracking-[-0.03em]">
-                    {reason.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-muted">
-                    {reason.text}
+              <Reveal delay={0.25} className="mt-6 overflow-hidden rounded-2xl">
+                <div className="relative h-56">
+                  <Image
+                    src="/images/doctor-talking.png"
+                    alt="A healthcare professional in a warm, supportive consultation about alcohol detox options"
+                    fill
+                    sizes="(max-width: 1024px) 90vw, 34vw"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-graphite/60 via-transparent to-transparent" />
+                  <p className="absolute bottom-4 left-4 right-4 text-xs font-semibold leading-5 text-white/90">
+                    A thorough assessment identifies the safest type of support — whether at home, in hospital or in a residential clinic.
                   </p>
-                </motion.div>
+                </div>
+              </Reveal>
+            </div>
+            <div className="grid gap-5">
+              {[
+                {
+                  number: "01",
+                  icon: Droplets,
+                  title: "What detox means",
+                  text: "Detox is a short-term period of physical stabilisation. The immediate aims are to manage withdrawal, support hydration and nutrition, and reduce the risk of complications while alcohol leaves the body.",
+                },
+                {
+                  number: "02",
+                  icon: Stethoscope,
+                  title: "Why withdrawal occurs",
+                  text: "Regular heavy drinking can change how the brain regulates activity. When alcohol is suddenly removed, the nervous system can become overactive, causing symptoms such as anxiety, sweating, tremors, nausea and disturbed sleep.",
+                },
+                {
+                  number: "03",
+                  icon: Brain,
+                  title: "Who may need supervision",
+                  text: "Medically assisted alcohol detox may be advised after heavy daily drinking, previous seizures or DTs, repeated withdrawal, significant health problems, pregnancy, or where there is limited support. Assessment determines whether home, hospital or residential alcohol detox is appropriate.",
+                },
+              ].map((item, index) => (
+                <Reveal key={item.number} delay={index * 0.08} className={index === 1 ? "lg:ml-10" : index === 2 ? "lg:ml-4" : ""}>
+                  <article className="reference-card group">
+                    <div className="flex items-start gap-5">
+                      <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-soft text-brand-ink transition group-hover:rotate-[-4deg] group-hover:scale-105">
+                        <item.icon className="h-6 w-6" />
+                      </span>
+                      <div>
+                        <div className="flex items-center justify-between gap-4">
+                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand">{item.number} / Detox essentials</p>
+                          <ChevronRight className="h-5 w-5 text-graphite/20 transition group-hover:translate-x-1 group-hover:text-brand" />
+                        </div>
+                        <h3 className="mt-3 text-2xl font-bold tracking-[-0.025em]">{item.title}</h3>
+                        <p className="mt-3 leading-7 text-muted">{item.text}</p>
+                      </div>
+                    </div>
+                  </article>
+                </Reveal>
               ))}
             </div>
-            <motion.div {...fadeIn} className="mt-8">
-              <Button asChild variant="secondary">
-                <a href="https://thewellbourneclinic.co.uk/alcohol-rehab/">
-                  Explore alcohol rehab <ExternalLink className="h-5 w-5" />
-                </a>
-              </Button>
-            </motion.div>
-          </motion.div>
-          <motion.div
-            {...fadeIn}
-            className="grid grid-cols-2 gap-4"
-            transition={{ ...fadeIn.transition, delay: 0.12 }}
-          >
-            <div className="space-y-4">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[1.75rem] shadow-card">
-                <Image
-                  src="/images/therapy-room.jpg"
-                  alt="A therapy room prepared for a private conversation"
-                  fill
-                  className="object-cover transition duration-700 hover:scale-105"
-                  sizes="(min-width: 1024px) 24vw, 50vw"
-                />
-              </div>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] shadow-card">
-                <Image
-                  src="/images/cotswolds-rural-countryside-and-farmland-landscape-2024-09-22-14-55-20-utc-scaled.jpg"
-                  alt="Cotswolds rural countryside and farmland landscape"
-                  fill
-                  className="object-cover transition duration-700 hover:scale-105"
-                  sizes="(min-width: 1024px) 24vw, 50vw"
-                />
-              </div>
-            </div>
-            <div className="relative mt-12 aspect-[4/5] overflow-hidden rounded-[1.75rem] shadow-card">
-              <Image
-                src="/images/clinic-lounge.jpg"
-                alt="A calm lounge space at The Wellbourne Clinic"
-                fill
-                className="object-cover transition duration-700 hover:scale-105"
-                sizes="(min-width: 1024px) 24vw, 50vw"
-              />
-            </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      <section id="articles" className="bg-porcelain py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-5 md:px-8">
-          <div className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
-            <SectionHeading
-              eyebrow="Helpful articles"
-              title="Honest guidance for the questions you may be carrying."
-              text="Read clear, practical information about Alcohol Dependence, detox, treatment and everyday recovery. We’re here to help you understand your options."
-              align="left"
-            />
-          </div>
-        </div>
-        <div
-          ref={articleRailRef}
-          onPointerEnter={() => setIsArticleRailPaused(true)}
-          onPointerLeave={() => setIsArticleRailPaused(false)}
-          onFocus={() => setIsArticleRailPaused(true)}
-          onBlur={() => setIsArticleRailPaused(false)}
-          className="article-rail no-scrollbar mt-10 overflow-x-auto overscroll-x-contain px-5 pb-10 pt-8 md:px-8"
-        >
-          <div className="mx-auto flex w-max max-w-none gap-5 pr-5 md:gap-7">
-            {[...articles, ...articles].map((article, index) => (
-              <motion.article
-                key={`${article.title}-${index}`}
-                initial={{ opacity: 0, x: 50, rotate: index % 2 ? 0.7 : -0.7 }}
-                whileInView={{ opacity: 1, x: 0, rotate: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{
-                  duration: 0.75,
-                  delay: index * 0.08,
-                  ease: smoothEase,
-                }}
-                whileHover={{ y: -8 }}
-                className="article-card group relative h-[520px] w-[82vw] max-w-[390px] overflow-hidden rounded-[2rem] bg-midnight shadow-editorial ring-1 ring-white/70 sm:w-[390px] md:h-[610px] md:max-w-[460px] md:w-[460px]"
-              >
-                <div className="ambient-loading absolute inset-0" />
-                <Image
-                  src={article.image}
-                  alt=""
-                  fill
-                  className="object-cover transition duration-[1200ms] group-hover:scale-105"
-                  sizes="(min-width: 768px) 460px, 82vw"
-                />
-                <div className={`absolute inset-0 bg-gradient-to-b ${article.tone}`} />
-                <div className="absolute inset-0 flex flex-col justify-between p-6 text-white md:p-8">
-                  <div className="flex items-start justify-between gap-4">
-                    <span className="rounded-full border border-white bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.12em] text-graphite shadow-sm">
-                      {article.category}
-                    </span>
-                    <span className="flex items-center gap-2 rounded-full bg-black/24 px-4 py-2 text-sm font-semibold backdrop-blur">
-                      <Clock3 className="h-4 w-4" /> {article.readTime}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-balance text-[2.35rem] font-semibold leading-[0.98] tracking-[-0.055em] md:text-[3.2rem]">
-                      {article.title}
-                    </h3>
-                    <p className="mt-5 max-w-sm text-base leading-7 text-white/78 md:text-lg">
-                      {article.text}
-                    </p>
-                    <a
-                      href={article.href}
-                      className="mt-7 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-graphite transition duration-300 hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-midnight"
-                    >
-                      Read on main site <ExternalLink className="h-4 w-4" />
+      <section className="relative overflow-hidden">
+        <div className="relative min-h-[380px] md:min-h-[440px]">
+          <Image
+            src="/images/talking-recovery.png"
+            alt="Two people in a calm, open conversation about alcohol withdrawal and recovery"
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-graphite/65" />
+          <div className="relative flex min-h-[380px] items-center px-5 md:min-h-[440px]">
+            <div className="page-shell">
+              <Reveal>
+                <div className="max-w-2xl">
+                  <p className="medical-eyebrow text-brand">A calmer perspective</p>
+                  <p className="mt-5 text-balance text-[clamp(1.7rem,3.5vw,2.75rem)] font-bold leading-[1.15] tracking-[-0.035em] text-white">
+                    Withdrawal is unpredictable. No one should have to face it without the right support.
+                  </p>
+                  <p className="mt-4 text-base leading-7 text-white/60">
+                    This is a core principle of safe, medically assisted alcohol detox care — and the starting point for every conversation we have.
+                  </p>
+                  <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <a href={phoneHref} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand px-6 text-sm font-bold text-white transition hover:-translate-y-1 hover:bg-[#e88975]">
+                      <Phone className="h-4 w-4" /> Talk to someone now
+                    </a>
+                    <a href="#symptoms" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 text-sm font-bold text-white transition hover:-translate-y-1 hover:bg-white/10">
+                      Understand the symptoms <ArrowRight className="h-4 w-4" />
                     </a>
                   </div>
                 </div>
-              </motion.article>
+              </Reveal>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="symptoms" className="relative bg-[#f0ece6] px-5 py-20 md:py-28">
+        <div className="section-wave absolute inset-x-0 top-0 h-5 -translate-y-full" />
+        <div className="page-shell">
+          <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+            <SectionIntro
+              eyebrow="Alcohol withdrawal symptoms"
+              title="Symptoms vary in severity."
+              text="Withdrawal is different for everyone. Symptoms may be physical, psychological or both, and can change quickly during the early alcohol withdrawal stages. Their severity cannot be judged by alcohol intake alone."
+            />
+            <div className="max-w-sm">
+              <InfoPanel label="Important" icon={Zap} tone="important">
+                Severe confusion, seizures or hallucinations are medical emergencies. Call 999.
+              </InfoPanel>
+            </div>
+          </div>
+          <Reveal className="mt-8 overflow-hidden rounded-2xl">
+            <div className="relative h-[150px] md:h-[175px]">
+              <Image
+                src="/images/reflection.png"
+                alt="A person in quiet contemplation — withdrawal is a deeply personal experience that varies between individuals"
+                fill
+                sizes="(max-width: 768px) 100vw, 80vw"
+                className="object-cover object-top"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#f0ece6]/90 via-[#f0ece6]/40 to-transparent" />
+              <p className="absolute left-5 top-1/2 -translate-y-1/2 max-w-xs text-sm font-semibold leading-6 text-graphite/85 md:max-w-sm">
+                Everyone&apos;s experience of withdrawal is different. It cannot be reliably predicted from the amount someone drinks.
+              </p>
+            </div>
+          </Reveal>
+          <div className="severity-scale mt-10" aria-label="Symptom severity increases from mild to severe">
+            <span>Mild</span><span>Moderate</span><span>Severe</span>
+          </div>
+          <div className="mt-12 grid gap-5 lg:grid-cols-3">
+            {symptomGroups.map((group, index) => (
+              <Reveal key={group.level} delay={index * 0.1} className={index === 1 ? "lg:translate-y-6" : ""}>
+                <article className={`symptom-card symptom-${group.tone}`}>
+                  <div className="flex items-start justify-between">
+                    <span className="symptom-icon"><group.icon className="h-6 w-6" /></span>
+                    <span className="text-xs font-extrabold tabular-nums text-graphite/30">Severity 0{index + 1}</span>
+                  </div>
+                  <h3 className="mt-7 text-2xl font-bold tracking-[-0.03em]">{group.level}</h3>
+                  <p className="mt-2 text-sm font-semibold text-muted">{group.timing}</p>
+                  <ul className="mt-7 space-y-3">
+                    {group.symptoms.map((symptom) => (
+                      <li key={symptom} className="flex items-center gap-3 border-t border-graphite/8 pt-3 text-sm font-medium">
+                        <span className="grid h-5 w-5 place-items-center rounded-full bg-white"><Check className="h-3 w-3" /></span>
+                        {symptom}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="contact" className="px-5 py-24 md:px-8 md:py-32">
-        <motion.div
-          {...fadeIn}
-          className="mx-auto grid max-w-7xl overflow-hidden rounded-[2rem] border border-white/70 bg-midnight text-white shadow-soft lg:grid-cols-[1.08fr_0.92fr]"
-        >
-          <div className="p-8 md:p-14">
-            <SectionLabel>Take the next step</SectionLabel>
-            <h2 className="max-w-3xl text-balance break-words text-[2.15rem] font-semibold leading-[1.04] tracking-[-0.04em] md:text-[4rem] md:tracking-[-0.045em]">
-              You do not need the right words before asking for help.
-            </h2>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72 md:text-xl">
-              We understand that the first step can feel difficult. Your
-              information will stay confidential, and our friendly team will
-              simply listen and guide you through your options.
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Button asChild>
-                <a href={phoneHref}>
-                  Call {phoneNumber} <Phone className="h-5 w-5" />
-                </a>
-              </Button>
-              <Button asChild variant="secondary">
-                <a href={contactUrl}>Contact on main website</a>
-              </Button>
+      <section id="timeline" className="bg-graphite px-5 py-20 text-white md:py-28">
+        <div className="page-shell">
+          <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+            <div className="max-w-3xl">
+              <p className="medical-eyebrow text-brand">Alcohol withdrawal timeline</p>
+              <h2 className="mt-4 text-balance text-[clamp(2.2rem,4.5vw,4rem)] font-bold leading-[1] tracking-[-0.045em]">
+                What may happen after the last drink.
+              </h2>
+              <p className="mt-5 max-w-lg text-lg leading-8 text-white/60">
+                This alcohol withdrawal timeline is a general guide, not a prediction. Symptoms can overlap between stages, and previous severe withdrawal can increase the risk during a future attempt.
+              </p>
             </div>
-            <div className="mt-8 grid gap-3 text-sm text-white/76 sm:grid-cols-2">
-              <a
-                href={`mailto:${emailAddress}`}
-                className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-4 transition hover:bg-white/[0.1]"
-              >
-                <Mail className="h-4 w-4 text-brand" />
-                {emailAddress}
-              </a>
-              <a
-                href={whatsappUrl}
-                className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-4 transition hover:bg-white/[0.1]"
-              >
-                <MessageCircle className="h-4 w-4 text-brand" />
-                WhatsApp the clinic
-              </a>
-              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-4 sm:col-span-2">
-                <MapPin className="h-4 w-4 shrink-0 text-brand" />
-                {address}
+            <div className="max-w-sm rounded-2xl border border-white/10 bg-white/5 p-5">
+              <div className="flex items-center gap-3">
+                <Clock3 className="h-5 w-5 text-brand" />
+                <p className="text-sm font-bold">The first 72 hours need particular care.</p>
               </div>
             </div>
           </div>
-          <div className="relative min-h-[380px]">
-            <Image
-              src="/images/home.jpg"
-              alt="A private room at The Wellbourne Clinic"
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 40vw, 100vw"
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(13,22,33,0.42),rgba(13,22,33,0.02))]" />
-          </div>
-        </motion.div>
-      </section>
-
-      <section id="faqs" className="bg-[#eee9e9] px-5 py-24 md:px-8 md:py-32">
-        <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[1.42fr_0.88fr] lg:items-start">
-          <motion.div {...fadeIn}>
-            <h2 className="max-w-3xl text-[2.45rem] font-semibold leading-[1.02] tracking-[-0.045em] text-black md:text-[4rem]">
-              Frequently asked questions
-            </h2>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-graphite/68 md:text-lg">
-              Everyone’s situation is different. These answers offer a simple
-              starting point, and you can speak with us privately whenever
-              you’re ready.
-            </p>
-            <div className="mt-10">
-              <Accordion type="single" collapsible className="w-full">
-                {faqs.map((faq, index) => (
-                  <AccordionItem
-                    key={faq.question}
-                    value={`item-${index}`}
-                    className="border-b border-black/16"
-                  >
-                    <AccordionTrigger className="py-4 text-[1.02rem] font-semibold leading-[1.18] tracking-[-0.018em] text-black hover:text-brand-ink md:text-[1.18rem] [&>svg]:text-black">
-                      {faq.question}
-                    </AccordionTrigger>
-                    <AccordionContent className="max-w-3xl text-sm leading-6 text-graphite/70">
-                      {faq.answer}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
-          </motion.div>
-
-          <motion.aside
-            {...fadeIn}
-            transition={{ ...fadeIn.transition, delay: 0.08 }}
-            className="sticky top-28 min-h-[540px] overflow-hidden rounded-[2rem] bg-[#f19885] p-7 text-white shadow-[0_34px_90px_rgba(17,24,39,0.24)] md:p-9"
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="mt-10 overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/5 p-6 md:p-8"
+            role="img"
+            aria-label="Chart showing alcohol withdrawal symptom severity over time, peaking at days 2 to 3"
           >
-            <Image
-              src="/cardbackground.jpg"
-              alt=""
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 36vw, 100vw"
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,24,39,0.04)_0%,rgba(17,24,39,0.16)_100%)]" />
-            <div className="relative flex min-h-[484px] flex-col justify-between text-center md:text-left">
-              <div className="flex flex-col items-center md:items-start">
-                <div className="mb-10 flex h-28 w-28 items-center justify-center rounded-full bg-white/22 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.32)] backdrop-blur md:mb-12 md:h-24 md:w-24">
-                  <Smile className="h-16 w-16 stroke-[1.9] md:h-14 md:w-14" />
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.16em] text-brand">Symptom severity over time</p>
+            <svg viewBox="0 0 900 210" className="w-full" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="wdSeverityFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f19885" stopOpacity="0.18" />
+                  <stop offset="100%" stopColor="#f19885" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              {/* Horizontal grid lines */}
+              <line x1="0" y1="50" x2="900" y2="50" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+              <line x1="0" y1="100" x2="900" y2="100" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+              <line x1="0" y1="150" x2="900" y2="150" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+              {/* Stage separator lines */}
+              <line x1="185" y1="0" x2="185" y2="170" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="4 4" />
+              <line x1="385" y1="0" x2="385" y2="170" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="4 4" />
+              <line x1="600" y1="0" x2="600" y2="170" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="4 4" />
+              <line x1="770" y1="0" x2="770" y2="170" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="4 4" />
+              {/* Fill under curve */}
+              <path
+                d="M 0,165 C 55,165 85,150 125,134 C 165,115 215,74 272,38 C 315,16 350,12 390,12 C 428,12 458,30 510,66 C 568,107 638,135 715,148 C 792,158 855,162 900,163 L 900,170 L 0,170 Z"
+                fill="url(#wdSeverityFill)"
+              />
+              {/* Main curve */}
+              <motion.path
+                d="M 0,165 C 55,165 85,150 125,134 C 165,115 215,74 272,38 C 315,16 350,12 390,12 C 428,12 458,30 510,66 C 568,107 638,135 715,148 C 792,158 855,162 900,163"
+                fill="none"
+                stroke="#f19885"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                initial={{ pathLength: 0 }}
+                whileInView={{ pathLength: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 2, ease: "easeInOut" }}
+              />
+              {/* Stage dots */}
+              <circle cx="125" cy="134" r="4.5" fill="#f19885" />
+              <circle cx="390" cy="12" r="5.5" fill="#f19885" />
+              <circle cx="600" cy="118" r="4.5" fill="#f19885" />
+              <circle cx="770" cy="149" r="4.5" fill="#f19885" />
+              {/* Peak label */}
+              <text x="390" y="6" textAnchor="middle" fontSize="9" fill="#f19885" fontFamily="inherit" fontWeight="700">▲ Peak risk</text>
+              {/* Baseline */}
+              <line x1="0" y1="170" x2="900" y2="170" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+              {/* X axis labels */}
+              <text x="92" y="186" textAnchor="middle" fontSize="8.5" fill="rgba(255,255,255,0.38)" fontFamily="inherit">Hours 6–12</text>
+              <text x="284" y="186" textAnchor="middle" fontSize="8.5" fill="rgba(255,255,255,0.38)" fontFamily="inherit">Days 2–3</text>
+              <text x="492" y="186" textAnchor="middle" fontSize="8.5" fill="rgba(255,255,255,0.38)" fontFamily="inherit">Days 4–7</text>
+              <text x="683" y="186" textAnchor="middle" fontSize="8.5" fill="rgba(255,255,255,0.38)" fontFamily="inherit">Week 2+</text>
+              <text x="845" y="186" textAnchor="middle" fontSize="8.5" fill="rgba(255,255,255,0.38)" fontFamily="inherit">Beyond</text>
+              {/* Y axis labels */}
+              <text x="8" y="20" fontSize="8" fill="rgba(255,255,255,0.25)" fontFamily="inherit">High</text>
+              <text x="8" y="168" fontSize="8" fill="rgba(255,255,255,0.25)" fontFamily="inherit">Low</text>
+            </svg>
+            <p className="mt-3 text-xs leading-5 text-white/28">
+              General guide only — individual experience varies. Source: NICE clinical guideline CG100; SIGN 74 — The management of harmful drinking and alcohol dependence.
+            </p>
+          </motion.div>
+          <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {[
+              { src: "/images/morning-walk.png", alt: "A person on a morning walk — gentle movement supports physical recovery in the early days", caption: "Early days" },
+              { src: "/images/forest.png", alt: "A forest path representing the gradual, day-by-day journey through withdrawal", caption: "Day by day" },
+              { src: "/images/human-talking.png", alt: "Two people talking openly — professional support is essential during alcohol withdrawal", caption: "With support" },
+            ].map((img) => (
+              <Reveal key={img.src} className="relative h-36 overflow-hidden rounded-2xl">
+                <Image src={img.src} alt={img.alt} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover opacity-60" />
+                <div className="absolute inset-0 rounded-2xl bg-graphite/45" />
+                <p className="absolute bottom-3 left-4 text-xs font-bold uppercase tracking-[0.14em] text-white/70">{img.caption}</p>
+              </Reveal>
+            ))}
+          </div>
+          <ol className="timeline-list mt-14">
+            {timeline.map((item, index) => (
+              <motion.li
+                key={item.time}
+                className="timeline-item"
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+              >
+                <div className="timeline-marker"><item.icon className="h-5 w-5" /></div>
+                <div className="timeline-card">
+                  <div className="timeline-stage">Stage {index + 1} of 4</div>
+                  <div className="p-6 md:p-7">
+                    <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-brand">{item.time}</p>
+                    <h3 className="mt-2 text-2xl font-bold">{item.title}</h3>
+                    <p className="mt-3 leading-7 text-white/65">{item.text}</p>
+                    <p className="mt-5 flex items-center gap-2 border-t border-white/10 pt-4 text-sm font-semibold text-white/85">
+                      <ShieldCheck className="h-4 w-4 text-brand" /> {item.note}
+                    </p>
+                  </div>
                 </div>
-                <h3 className="min-h-[3.8rem] max-w-full text-[1.45rem] font-semibold leading-[1.06] tracking-[-0.035em] sm:text-[1.7rem] md:min-h-[4.6rem] md:text-[1.95rem]">
-                  <motion.span
-                    key={faqCardMessages[activeFaqMessage]}
-                    className="typewriter-text"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {faqCardMessages[activeFaqMessage]}
-                  </motion.span>
-                </h3>
-                <a
-                  href={phoneHref}
-                  className="mt-10 flex min-h-20 items-center justify-center gap-4 rounded-2xl bg-white/95 px-6 text-center text-lg font-extrabold tracking-[-0.025em] text-[#7a3157] shadow-[0_18px_45px_rgba(17,24,39,0.14)] transition hover:-translate-y-0.5 hover:bg-white md:text-xl"
-                >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f19885]/18 text-[#7a3157]">
-                    <Phone className="h-5 w-5 animate-bounce" />
-                  </span>
-                  Call {phoneNumber}
-                </a>
-              </div>
-              <div className="mt-8 flex items-center justify-center gap-5 md:justify-between">
-                <a
-                  href={`mailto:${emailAddress}`}
-                  className="group flex min-w-0 items-center gap-5 text-left text-white"
-                >
-                  <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/22 text-white backdrop-blur transition group-hover:scale-105">
-                    <Mail className="h-8 w-8" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-xl font-extrabold tracking-[-0.025em]">
-                      Prefer to email?
-                    </span>
-                    <span className="mt-1 block truncate text-base font-semibold text-white/82">
-                      {emailAddress}
-                    </span>
-                  </span>
-                </a>
-              </div>
-            </div>
-          </motion.aside>
+              </motion.li>
+            ))}
+          </ol>
+          <div className="mt-10 max-w-xl">
+            <InfoPanel label="Recovery fact" icon={Sparkles} tone="recovery">
+              Detox is often only the first stage of treatment. Therapy and aftercare help turn physical stabilisation into a longer-term recovery plan.
+            </InfoPanel>
+          </div>
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-[#f4efea] px-5 py-20 md:px-8 md:py-28">
-        <motion.div
-          {...fadeIn}
-          className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.35rem] border border-white/75 shadow-soft"
-          style={{ background: activeDay.background }}
-        >
-          <motion.div
-            aria-hidden="true"
-            className="absolute inset-0"
-            animate={{
-              background: [
-                `radial-gradient(circle at 50% 98%, ${activeDay.glow}, transparent 38%)`,
-                `radial-gradient(circle at 48% 94%, ${activeDay.glow}, transparent 42%)`,
-                `radial-gradient(circle at 52% 96%, ${activeDay.glow}, transparent 39%)`,
-              ],
-            }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : 9,
-              repeat: shouldReduceMotion ? 0 : Infinity,
-              ease: "easeInOut",
-            }}
+      <section id="detox-vs-rehab" className="px-5 py-20 md:py-28">
+        <div className="page-shell">
+          <SectionIntro
+            eyebrow="Detox vs rehab"
+            title="Connected stages, different purposes."
+            text="The simplest way to understand detox vs rehab is that detox treats the immediate physical effects of stopping alcohol, while rehab helps a person understand their drinking and build the skills, support and routines needed for longer-term change."
           />
-          <div className="absolute inset-0 soft-grid opacity-[0.08]" />
-
-          <div className="relative z-10 grid gap-8 p-6 md:p-10 lg:grid-cols-[0.88fr_1.12fr] lg:p-12">
-            <div className="flex min-h-[520px] flex-col justify-between">
-              <div>
-                <SectionLabel>Recovery rhythm</SectionLabel>
-                <h2
-                  className={`max-w-3xl text-balance font-heading text-[2.5rem] font-semibold leading-[1] tracking-[-0.052em] transition-colors duration-500 md:text-[5rem] ${
-                    isDarkDayMode ? "text-white" : "text-graphite"
-                  }`}
-                >
-                  Support can meet you wherever you are in your day.
-                </h2>
-                <p
-                  className={`mt-6 max-w-xl text-lg leading-8 transition-colors duration-500 md:text-xl ${
-                    isDarkDayMode ? "text-white/75" : "text-graphite/68"
-                  }`}
-                >
-                  Change the light and watch the field settle. A quiet reminder
-                  that recovery has different moments, and you don’t have to
-                  move through them alone.
-                </p>
+          <div className="mt-12 overflow-hidden rounded-[1.75rem] border border-graphite/10 bg-white shadow-card">
+            <div className="grid grid-cols-[.8fr_1fr_1fr] bg-graphite text-white">
+              <div className="p-5 md:p-7"><span className="text-xs font-bold uppercase tracking-[.16em] text-white/45">At a glance</span></div>
+              <div className="border-l border-white/10 p-5 md:p-7">
+                <div className="flex items-center gap-3"><Droplets className="h-5 w-5 text-brand" /><h3 className="text-xl font-bold">Alcohol detox</h3></div>
               </div>
-
-              <div className="mt-10 max-w-sm rounded-[1.5rem] border border-white/70 bg-white/62 p-4 shadow-card backdrop-blur-xl">
-                <label
-                  htmlFor="recovery-day-mode"
-                  className="mb-3 flex items-center gap-3 text-sm font-bold uppercase tracking-[0.14em] text-graphite/58"
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-brand shadow-sm">
-                    <ActiveDayIcon className="h-5 w-5" />
-                  </span>
-                  Choose the light
-                </label>
-                <select
-                  id="recovery-day-mode"
-                  value={activeDayMode}
-                  onChange={(event) => setActiveDayMode(event.target.value)}
-                  className="w-full appearance-none rounded-2xl border border-graphite/10 bg-white px-4 py-4 text-base font-bold text-graphite shadow-sm outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/18"
-                >
-                  {dayModes.map((mode) => (
-                    <option key={mode.id} value={mode.id}>
-                      {mode.label}
-                    </option>
-                  ))}
-                </select>
-                <div className="mt-4 grid grid-cols-5 gap-2">
-                  {dayModes.map((mode) => (
-                    <button
-                      key={mode.id}
-                      type="button"
-                      onClick={() => setActiveDayMode(mode.id)}
-                      aria-label={`Use ${mode.label} colours`}
-                      aria-pressed={activeDayMode === mode.id}
-                      className={`flex h-11 items-center justify-center rounded-xl border transition ${
-                        activeDayMode === mode.id
-                          ? "border-brand bg-brand text-white shadow-sm"
-                          : "border-graphite/10 bg-white/72 text-graphite/58 hover:bg-white hover:text-graphite"
-                      }`}
-                    >
-                      <mode.icon className="h-5 w-5" />
-                    </button>
-                  ))}
-                </div>
+              <div className="border-l border-white/10 p-5 md:p-7">
+                <div className="flex items-center gap-3"><HeartHandshake className="h-5 w-5 text-brand" /><h3 className="text-xl font-bold">Alcohol rehab</h3></div>
               </div>
             </div>
-
-            <div className="relative min-h-[520px] overflow-hidden rounded-[1.9rem] bg-white/18 backdrop-blur-sm">
-              <svg
-                viewBox="0 0 900 520"
-                role="img"
-                aria-label="Animated radial field representing changing recovery rhythms"
-                className="absolute inset-0 h-full w-full"
-                preserveAspectRatio="xMidYMax slice"
-              >
-                <defs>
-                  <radialGradient id="recoveryCore" cx="50%" cy="96%" r="58%">
-                    <stop offset="0%" stopColor={activeDay.accent} stopOpacity="0.7" />
-                    <stop offset="45%" stopColor={activeDay.glow} stopOpacity="0.28" />
-                    <stop offset="100%" stopColor={activeDay.glow} stopOpacity="0" />
-                  </radialGradient>
-                  <filter id="nodeGlow" x="-60%" y="-60%" width="220%" height="220%">
-                    <feGaussianBlur stdDeviation="5" result="blur" />
-                    <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-                <motion.circle
-                  cx="450"
-                  cy="438"
-                  r="250"
-                  fill="url(#recoveryCore)"
-                  animate={shouldReduceMotion ? undefined : { r: [228, 268, 238] }}
-                  transition={{
-                    duration: 8,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                />
-                {recoveryFieldNodes.map((node) => (
-                  <motion.g
-                    key={node.id}
-                    initial={false}
-                    animate={
-                      shouldReduceMotion
-                        ? undefined
-                        : {
-                            opacity: [node.opacity * 0.72, node.opacity, node.opacity * 0.82],
-                          }
-                    }
-                    whileHover={{ opacity: 1, scale: 1.045 }}
-                    transition={{
-                      duration: 4.4 + (node.id % 7) * 0.32,
-                      delay: node.delay,
-                      repeat: shouldReduceMotion ? 0 : Infinity,
-                      repeatType: "mirror",
-                      ease: "easeInOut",
-                    }}
-                    style={{ transformOrigin: "450px 438px" }}
-                  >
-                    <line
-                      x1="450"
-                      y1="438"
-                      x2={node.x}
-                      y2={node.y}
-                      stroke={activeDay.line}
-                      strokeWidth={node.width}
-                      strokeLinecap="round"
-                    />
-                    <motion.circle
-                      cx={node.x}
-                      cy={node.y}
-                      r={node.radius}
-                      fill={activeDay.node}
-                      filter={node.id % 4 === 0 ? "url(#nodeGlow)" : undefined}
-                      whileHover={{
-                        r: node.radius * 2.4,
-                        fill: activeDay.accent,
-                      }}
-                    />
-                  </motion.g>
-                ))}
-              </svg>
-
-              <div className="absolute right-4 top-4 rounded-2xl border border-white/60 bg-white/62 p-2 shadow-card backdrop-blur-xl">
-                <div className="flex items-center gap-2 px-2 py-1 text-sm font-bold text-graphite">
-                  <ActiveDayIcon className="h-4 w-4 text-brand" />
-                  {activeDay.label}
-                </div>
+            {comparisons.map(([label, detox, rehab]) => (
+              <div key={label} className="comparison-row grid grid-cols-[.8fr_1fr_1fr]">
+                <div className="p-4 text-sm font-bold md:p-6">{label}</div>
+                <div className="border-l border-graphite/10 p-4 text-sm leading-6 text-muted md:p-6">{detox}</div>
+                <div className="border-l border-graphite/10 bg-brand-soft/20 p-4 text-sm leading-6 text-muted md:p-6">{rehab}</div>
               </div>
-
-              <div className="absolute bottom-5 left-5 right-5 rounded-[1.45rem] border border-white/55 bg-white/52 p-5 shadow-card backdrop-blur-xl md:left-6 md:right-auto md:max-w-md">
-                <p className="text-sm font-bold uppercase tracking-[0.16em] text-graphite/50">
-                  Current light
-                </p>
-                <p className="mt-2 text-2xl font-semibold tracking-[-0.035em] text-graphite">
-                  {activeDay.label} at The Wellbourne Clinic
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
-        </motion.div>
+          <p className="mt-5 flex items-start gap-2 text-sm leading-6 text-muted">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+            Alcohol rehab detox programmes often connect medically assisted alcohol detox directly with residential rehabilitation, therapy and aftercare, so there is no unsupported gap between stages.
+          </p>
+          <Reveal className="mt-10 overflow-hidden rounded-[1.75rem] border border-graphite/10 bg-white shadow-card">
+            <div className="grid lg:grid-cols-[1fr_1.5fr]">
+              <div className="relative min-h-[220px]">
+                <Image
+                  src="/images/therapy-chairs.png"
+                  alt="Empty therapy chairs in a calm, private room — the space that follows a successful detox"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 38vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-graphite/30 to-transparent" />
+              </div>
+              <div className="flex items-center bg-brand-soft/40 p-7 md:p-9">
+                <div>
+                  <p className="medical-eyebrow">What comes next</p>
+                  <h3 className="mt-4 text-2xl font-bold leading-snug tracking-tight md:text-3xl">
+                    Detox ends the physical dependence. Rehab builds the life that follows.
+                  </h3>
+                  <p className="mt-4 text-sm leading-7 text-muted">
+                    Connecting detox directly into residential rehabilitation reduces unsupported gaps — and creates the strongest foundation for sustained change.
+                  </p>
+                  <a href="#final-cta" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-brand-ink hover:underline">
+                    Speak to a specialist <ArrowRight className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+          <Reveal className="mt-8">
+            <div className="programme-panel">
+              <div className="flex items-center gap-3">
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-soft text-brand-ink">
+                  <CalendarDays className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[.16em] text-brand">Common programme lengths</p>
+                  <p className="mt-1 text-sm text-muted">Examples only — the right duration depends on individual needs.</p>
+                </div>
+              </div>
+              <div className="programme-stats">
+                {programmeLengths.map((item, index) => (
+                  <motion.div
+                    key={item.value}
+                    className="programme-stat"
+                    initial={{ opacity: 0, scale: 0.94 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: index * 0.08 }}
+                  >
+                    <p><strong>{item.value}</strong> <span>{item.unit}</span></p>
+                    <div className="programme-progress"><i style={{ width: `${25 + index * 25}%` }} /></div>
+                    <p className="mt-2 text-xs font-semibold text-muted">{item.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        </div>
       </section>
 
-      <footer className="relative overflow-hidden bg-[#060914] px-5 py-16 text-white md:px-8 md:py-24">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(241,152,133,0.28),transparent_34%),radial-gradient(circle_at_88%_28%,rgba(80,130,255,0.22),transparent_34%),linear-gradient(180deg,#0c1224_0%,#050711_100%)]" />
-        <div className="absolute inset-0 soft-grid opacity-[0.08]" />
-        <div className="relative mx-auto max-w-7xl">
-          <div className="grid gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
-            <div>
-              <Image
-                src="/mainlogo.png"
-                alt="The Wellbourne Clinic"
-                width={340}
-                height={50}
-                className="h-auto w-[280px] brightness-0 invert sm:w-[340px]"
-              />
-              <h2 className="mt-10 max-w-4xl text-[3.2rem] font-semibold leading-[0.96] tracking-[-0.065em] md:text-[5.8rem]">
-                We’re here whenever you’re ready.
+      <section id="medical-support" className="px-5 pb-20 md:pb-28">
+        <div className="page-shell">
+          <div className="overflow-hidden rounded-[2rem] bg-brand-soft">
+            <div className="grid lg:grid-cols-[1.08fr_.92fr]">
+            <div className="p-7 md:p-12 lg:p-16">
+              <p className="medical-eyebrow">Why professional support matters</p>
+              <h2 className="mt-4 max-w-2xl text-balance text-[clamp(2.1rem,4vw,3.8rem)] font-bold leading-[1.02] tracking-[-0.045em]">
+                Withdrawal is treatable. It should also be taken seriously.
               </h2>
-              <p className="mt-7 max-w-2xl text-lg leading-8 text-white/68 md:text-xl">
-                Speak with us privately about Alcohol Rehab, drug rehab or
-                detox. We’ll listen without judgement and help you understand
-                what the next step could look like.
+              <p className="mt-5 max-w-xl text-lg leading-8 text-brand-ink/70">
+                Professional support can make withdrawal safer and more manageable, but good alcohol rehab and detox care goes beyond monitoring symptoms. It also creates a structured route into therapy, recovery planning and continuing support.
               </p>
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <Button type="button" onClick={openLiveChat}>
-                  Contact the clinic <MessageCircle className="h-5 w-5" />
-                </Button>
-                <Button asChild variant="secondary">
-                  <a href={mainSiteUrl}>
-                    Visit main website <ExternalLink className="h-5 w-5" />
-                  </a>
-                </Button>
+              <div className="mt-9 grid gap-4 sm:grid-cols-2">
+                {[
+                  [ShieldCheck, "Safety", "Assess withdrawal risk, monitor changing symptoms and provide appropriate medication or urgent care when needed."],
+                  [Brain, "Therapy", "Explore triggers, thoughts, emotions and patterns that detox alone cannot address."],
+                  [BedDouble, "Structure", "Provide regular meals, rest, appointments and a predictable routine away from immediate access to alcohol."],
+                  [HeartHandshake, "Aftercare", "Plan ongoing therapy, peer or family support, healthy routines and practical responses to cravings or setbacks."],
+                ].map(([Icon, title, text]) => {
+                  const ItemIcon = Icon as typeof ShieldCheck;
+                  return (
+                    <div key={title as string} className="rounded-2xl bg-white/65 p-5">
+                      <ItemIcon className="h-5 w-5 text-brand" />
+                      <h3 className="mt-3 font-bold">{title as string}</h3>
+                      <p className="mt-1 text-sm leading-6 text-muted">{text as string}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-
-            <div className="grid gap-4">
-              <a
-                href={phoneHref}
-                className="group flex items-center gap-5 rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-5 backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.12]"
-              >
-                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-card transition group-hover:scale-105">
-                  <Phone className="h-8 w-8" />
-                </span>
-                <span>
-                  <span className="block text-sm font-semibold uppercase tracking-[0.16em] text-white/45">
-                    Call now
-                  </span>
-                  <span className="mt-1 block text-2xl font-bold tracking-[-0.04em]">
-                    {phoneNumber}
-                  </span>
-                </span>
-              </a>
-              <a
-                href={`mailto:${emailAddress}`}
-                className="group flex items-center gap-5 rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-5 backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.12]"
-              >
-                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white text-graphite shadow-card transition group-hover:scale-105">
-                  <Mail className="h-8 w-8" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold uppercase tracking-[0.16em] text-white/45">
-                    Email
-                  </span>
-                  <span className="mt-1 block truncate text-xl font-bold tracking-[-0.04em] md:text-2xl">
-                    {emailAddress}
-                  </span>
-                </span>
-              </a>
-              <a
-                href={whatsappUrl}
-                className="group flex items-center gap-5 rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-5 backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.12]"
-              >
-                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#25D366] text-white shadow-card transition group-hover:scale-105">
-                  <MessageCircle className="h-8 w-8" />
-                </span>
-                <span>
-                  <span className="block text-sm font-semibold uppercase tracking-[0.16em] text-white/45">
-                    WhatsApp
-                  </span>
-                  <span className="mt-1 block text-2xl font-bold tracking-[-0.04em]">
-                    Message us
-                  </span>
-                </span>
-              </a>
-              <button
-                type="button"
-                onClick={openLiveChat}
-                className="group flex w-full items-center gap-5 rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-5 text-left backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.12]"
-              >
-                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-card transition group-hover:scale-105">
-                  <MessageCircle className="h-8 w-8" />
-                </span>
-                <span>
-                  <span className="block text-sm font-semibold uppercase tracking-[0.16em] text-white/45">
-                    Live chat
-                  </span>
-                  <span className="mt-1 block text-2xl font-bold tracking-[-0.04em]">
-                    Speak to us now
-                  </span>
-                </span>
-              </button>
+            <div className="relative min-h-[430px]">
+              <Image src="/images/therapy-woodland.png" alt="A warm, outdoor therapy conversation between two people during residential treatment" fill sizes="(max-width: 1024px) 100vw, 42vw" className="object-cover object-center transition duration-700 hover:scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-t from-graphite/60 via-transparent to-transparent lg:bg-gradient-to-r lg:from-brand-soft lg:via-transparent lg:to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 rounded-2xl bg-white/90 p-5 backdrop-blur">
+                <p className="text-sm font-bold">A supported detox can be planned around you.</p>
+                <p className="mt-1 text-sm leading-6 text-muted">An alcohol detox clinic can assess whether community support or a residential alcohol detox setting best reflects your personal level of risk.</p>
+              </div>
+            </div>
             </div>
           </div>
-
-          <div className="mt-14 flex flex-col gap-6 border-t border-white/10 pt-8 md:flex-row md:items-center md:justify-between">
-            <p className="text-sm text-white/45">
-              Copyright 2026 The Wellbourne Clinic. For urgent medical help,
-              call 999.
-            </p>
-            <div className="flex gap-3">
-              <a
-                href={instagramUrl}
-                aria-label="Instagram"
-                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/[0.07] text-white transition hover:-translate-y-1 hover:bg-white hover:text-graphite"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a
-                href={facebookUrl}
-                aria-label="Facebook"
-                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/[0.07] text-white transition hover:-translate-y-1 hover:bg-white hover:text-graphite"
-              >
-                <Facebook className="h-5 w-5" />
-              </a>
+          <div className="mt-14">
+            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+              <div>
+                <p className="medical-eyebrow">Recovery journey</p>
+                <h3 className="mt-3 text-3xl font-bold tracking-[-.035em] md:text-4xl">A connected pathway, not a single event.</h3>
+              </div>
+              <p className="max-w-lg text-sm leading-6 text-muted">People may enter at different points or revisit earlier stages. The pathway is a guide, not a test.</p>
             </div>
+            <Reveal className="mt-8 overflow-hidden rounded-2xl">
+              <div className="relative h-48 md:h-56">
+                <Image
+                  src="/images/father-son-walking.png"
+                  alt="A father and son walking together outdoors — recovery is strengthened by family connection and continuing support"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 80vw"
+                  className="object-cover object-top"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#f7f4ee] via-[#f7f4ee]/50 to-transparent" />
+                <p className="absolute left-6 top-1/2 -translate-y-1/2 max-w-xs text-sm font-semibold leading-6 text-graphite/90 md:max-w-sm">
+                  Recovery is rarely a straight line — but every step forward matters.
+                </p>
+              </div>
+            </Reveal>
+            <ol className="recovery-path mt-10">
+              {recoveryJourney.map((step, index) => (
+                <motion.li
+                  key={step.title}
+                  className="recovery-step"
+                  initial={{ opacity: 0, x: -12 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.07 }}
+                >
+                  <div className="recovery-node"><step.icon className="h-5 w-5" /></div>
+                  <p className="mt-4 text-xs font-bold uppercase tracking-[.14em] text-brand">0{index + 1}</p>
+                  <h4 className="mt-1 font-bold">{step.title}</h4>
+                  <p className="mt-2 text-sm leading-6 text-muted">{step.text}</p>
+                </motion.li>
+              ))}
+            </ol>
           </div>
+        </div>
+      </section>
 
-          <div className="mt-8 flex justify-center border-t border-white/10 pt-8 md:justify-start">
-            <Image
-              src="/new images/CQC-Registered-scaled-1.png"
-              alt="Regulated by the Care Quality Commission"
-              width={480}
-              height={252}
-              className="h-auto w-[220px] rounded-[0.8rem]"
+      <section id="questions" className="bg-white px-5 py-20 md:py-28">
+        <div className="page-shell grid gap-12 lg:grid-cols-[.72fr_1.28fr]">
+          <div>
+            <SectionIntro
+              eyebrow="Common questions"
+              title="Clear answers to sensible questions."
+              text="These answers cover common questions from people searching for alcohol detox near me, comparing treatment settings or trying to understand what happens next. General information cannot replace personal medical advice."
             />
+            <a href={phoneHref} className="mt-8 inline-flex items-center gap-3 rounded-full bg-graphite px-6 py-4 text-sm font-bold text-white transition hover:-translate-y-1">
+              <MessageCircle className="h-4 w-4 text-brand" /> Ask about treatment
+            </a>
+            <Reveal delay={0.15} className="mt-6 overflow-hidden rounded-2xl">
+              <div className="relative h-52">
+                <Image
+                  src="/images/morning-coffee.png"
+                  alt="A calm morning with a cup of coffee — life often feels steadier and more manageable after alcohol treatment"
+                  fill
+                  sizes="(max-width: 1024px) 90vw, 28vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-graphite/55 via-transparent to-transparent" />
+                <p className="absolute bottom-4 left-4 right-4 text-xs font-semibold leading-5 text-white/90">
+                  Many people describe daily life after treatment as calmer, steadier and more connected.
+                </p>
+              </div>
+            </Reveal>
+          </div>
+          <Accordion type="single" collapsible className="border-t border-graphite/10">
+            {faqs.map((faq, index) => (
+              <AccordionItem key={faq.question} value={`faq-${index}`}>
+                <AccordionTrigger className="text-lg md:text-xl">{faq.question}</AccordionTrigger>
+                <AccordionContent>{faq.answer}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      <section id="related-guides" className="px-5 py-20 md:py-28">
+        <div className="page-shell">
+          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <SectionIntro
+              eyebrow="Helpful guides"
+              title="Further reading, at your own pace."
+              text="Practical, plain-English guides to withdrawal, alcohol addiction treatment, rehab and life after treatment."
+            />
+            <a href="#top" className="inline-flex items-center gap-2 text-sm font-bold text-brand-ink">Browse all topics <ArrowRight className="h-4 w-4" /></a>
+          </div>
+          <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-12">
+            {guides.map((guide, index) => (
+              <a
+                key={guide.title}
+                href={guide.href}
+                className={`guide-card group ${index === 0 || index === 5 ? "guide-featured lg:col-span-7" : index === 1 || index === 4 ? "lg:col-span-5" : "lg:col-span-4"}`}
+              >
+                <div className="guide-image">
+                  <Image src={guide.image} alt="" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover transition duration-700 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-graphite/35 to-transparent" />
+                  <span className="absolute bottom-3 left-3 grid h-10 w-10 place-items-center rounded-xl bg-white/90 text-brand-ink shadow-sm backdrop-blur transition duration-300 group-hover:-rotate-6 group-hover:scale-105">
+                    <guide.icon className="h-5 w-5" />
+                  </span>
+                </div>
+                <div className="flex flex-1 items-start justify-between gap-5 p-5">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[.15em] text-brand">{guide.label}</p>
+                    <h3 className="mt-2 max-w-sm text-xl font-bold tracking-[-.025em]">{guide.title}</h3>
+                    <p className="mt-3 max-w-md text-sm leading-6 text-muted">{guide.description}</p>
+                  </div>
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-graphite/10 transition group-hover:translate-x-1 group-hover:border-brand group-hover:bg-brand group-hover:text-white">
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="final-cta" className="px-5 pb-5">
+        <div className="page-shell relative overflow-hidden rounded-[2rem] bg-graphite px-7 py-14 text-white md:px-14 md:py-16 lg:px-20">
+          <Image
+            src="/images/costal-walk.png"
+            alt=""
+            fill
+            sizes="(max-width: 1280px) 100vw, 1280px"
+            className="object-cover object-center opacity-20"
+            aria-hidden="true"
+          />
+          <div className="absolute -right-12 -top-24 h-72 w-72 rounded-full border-[55px] border-brand/15" />
+          <div className="absolute bottom-0 right-[30%] h-36 w-36 rounded-full bg-brand/10 blur-3xl" />
+          <div className="relative max-w-3xl">
+            <p className="medical-eyebrow text-brand">A calmer first step</p>
+            <h2 className="mt-4 text-balance text-[clamp(2.35rem,5vw,4.5rem)] font-bold leading-[.98] tracking-[-.05em]">
+              You do not have to work it all out today.
+            </h2>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-white/65">
+              A confidential conversation can help you understand the safest next step for you or someone you care about.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <a href={phoneHref} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-brand px-7 font-bold transition hover:-translate-y-1 hover:bg-[#e88975]">
+                <Phone className="h-4 w-4" /> Call {phoneNumber}
+              </a>
+              <a href="https://thewellbourneclinic.co.uk/contact/" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-7 font-bold transition hover:-translate-y-1 hover:bg-white/10">
+                Request a call back <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="px-5 py-10">
+        <div className="page-shell flex flex-col gap-7 border-t border-graphite/10 pt-8 md:flex-row md:items-center md:justify-between">
+          <Logo />
+          <p className="max-w-xl text-xs leading-5 text-muted">
+            This website provides general information and is not a substitute for medical assessment, diagnosis or emergency care.
+          </p>
+          <div className="flex gap-5 text-xs font-semibold text-muted">
+            <a href="#questions" className="hover:text-brand-ink">FAQs</a>
+            <a href="https://thewellbourneclinic.co.uk/privacy-policy/" className="hover:text-brand-ink">Privacy</a>
           </div>
         </div>
       </footer>
-
-      <LiveChatWidget
-        license="19292596"
-        visibility={chatVisibility}
-        onVisibilityChanged={({ visibility }) =>
-          setChatVisibility(visibility === "maximized" ? "maximized" : "minimized")
-        }
-      />
     </main>
   );
 }
