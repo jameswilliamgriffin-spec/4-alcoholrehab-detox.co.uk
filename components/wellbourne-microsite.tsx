@@ -8,14 +8,12 @@ import {
   BedDouble,
   BookOpen,
   Brain,
-  CalendarDays,
   Check,
   ChevronRight,
   CircleAlert,
   ClipboardCheck,
   Clock3,
   Droplets,
-  Eye,
   HeartHandshake,
   Home,
   Info,
@@ -23,17 +21,17 @@ import {
   Menu,
   MessageCircle,
   Phone,
+  Pill,
   ShieldCheck,
   Sparkles,
   Stethoscope,
   Thermometer,
   TriangleAlert,
   UserRoundCheck,
-  Users,
   X,
   Zap,
 } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useState } from "react";
 import {
   Accordion,
@@ -100,14 +98,17 @@ const timeline = [
   },
 ];
 
+const timelineSymptoms = [
+  ["Anxiety", "Sweating", "Headache", "Poor sleep", "Mild tremors"],
+  ["Stronger tremors", "Agitation", "Vomiting", "Rapid pulse", "Confusion"],
+  ["Low energy", "Unsettled sleep", "Low appetite", "Anxiety", "Cravings"],
+  ["Irritability", "Low mood", "Sleep disruption", "Cravings", "Reduced concentration"],
+];
+
 const comparisons = [
-  ["Purpose", "Manage withdrawal and reduce immediate medical risk", "Support sustained change and reduce the risk of relapse"],
-  ["Timescale", "Usually several days, depending on individual risk", "Often several weeks or longer, depending on need"],
-  ["Therapy", "Brief emotional support; therapy is not the main focus", "Individual and group work addressing behaviour, triggers and wellbeing"],
-  ["Medical support", "Observation and medication where clinically appropriate", "Continuing health support alongside therapeutic care"],
-  ["Daily experience", "Regular checks, rest and management of changing symptoms", "Structured therapy, education, reflection and recovery activities"],
-  ["Setting", "May be community-based, hospital-based or residential", "May be outpatient or residential alcohol rehab"],
-  ["Aftercare", "A clear handover into the next stage of treatment", "Ongoing therapy, support networks and relapse-prevention planning"],
+  ["Purpose", "Manage withdrawal safely and reduce the immediate medical risk of stopping alcohol", "Support sustained change through therapy, structured care and relapse-prevention planning"],
+  ["Timescale", "Usually several days — NICE guidance allows for 3 to 10 days depending on dependence severity", "Often several weeks or longer, depending on individual need and treatment goals"],
+  ["Medical support", "Observation, CIWA-Ar monitoring and medication (e.g. chlordiazepoxide) where clinically indicated", "Continuing health support alongside psychological and therapeutic care"],
 ];
 
 const guides = [
@@ -169,20 +170,11 @@ const faqs = [
   },
 ];
 
-const programmeLengths = [
-  { value: "7", unit: "days", label: "Short stabilisation" },
-  { value: "14", unit: "days", label: "Extended detox support" },
-  { value: "28", unit: "days", label: "Common rehab programme" },
-  { value: "90", unit: "days", label: "Longer-term treatment" },
-];
-
-const recoveryJourney = [
-  { title: "Recognition", icon: Eye, text: "Noticing that alcohol is affecting health, relationships or daily life." },
-  { title: "Assessment", icon: ClipboardCheck, text: "Understanding risk, needs and the safest treatment setting." },
-  { title: "Detox", icon: Droplets, text: "Managing withdrawal and supporting physical stabilisation." },
-  { title: "Therapy", icon: Brain, text: "Exploring triggers and building practical coping strategies." },
-  { title: "Aftercare", icon: Users, text: "Continuing support as everyday routines and responsibilities return." },
-  { title: "Long-term recovery", icon: Sparkles, text: "Strengthening wellbeing, connection and relapse-prevention skills." },
+const assessmentAreas = [
+  { icon: Activity, title: "Withdrawal risk", text: "Drinking history, previous seizures or DTs, frequency of use and physical health all affect withdrawal severity and the appropriate level of care." },
+  { icon: ClipboardCheck, title: "CIWA-Ar scoring", text: "The Clinical Institute Withdrawal Assessment for Alcohol measures symptom severity across ten indicators and guides medication decisions throughout supervised detox." },
+  { icon: Home, title: "Setting decision", text: "Assessment determines whether community, hospital or residential detox is appropriate — there is no single setting that suits everyone." },
+  { icon: Stethoscope, title: "Health screening", text: "Blood pressure, pulse, liver function and other physical markers are checked. Pre-existing conditions affect how medication is prescribed and monitored." },
 ];
 
 function Logo() {
@@ -273,6 +265,7 @@ function InfoPanel({
 
 export function WellbourneMicrosite() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeTimelineStage, setActiveTimelineStage] = useState<number | null>(null);
 
   const faqSchema = {
     "@context": "https://schema.org",
@@ -344,29 +337,32 @@ export function WellbourneMicrosite() {
         )}
       </header>
 
-      <section className="relative border-b border-graphite/10 bg-[linear-gradient(135deg,#f7f4ee_0%,#fffaf4_48%,#f4ebe7_100%)] px-5 py-14 md:py-20 lg:py-24">
-        <div className="hero-grid pointer-events-none absolute inset-0 opacity-45" />
-        <div className="page-shell relative grid gap-12 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-white/75 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-brand-ink shadow-sm backdrop-blur">
+      <section className="calm-hero relative border-b border-graphite/10 px-5">
+        <div className="hero-grid pointer-events-none absolute inset-0" />
+        <div className="calm-hero-glow calm-hero-glow-left" />
+        <div className="calm-hero-glow calm-hero-glow-right" />
+
+        <div className="page-shell relative">
+          <div className="mx-auto max-w-7xl pt-12 text-center md:pt-14 lg:pt-16">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/65 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-brand-ink shadow-[0_10px_35px_rgba(82,75,120,.08)] backdrop-blur-xl">
               <ShieldCheck className="h-4 w-4 text-brand" />
               Clinically informed guidance
             </div>
-            <h1 className="mt-7 max-w-3xl text-balance text-[clamp(2.8rem,6.5vw,5.75rem)] font-extrabold leading-[0.94] tracking-[-0.06em]">
-              Your alcohol detox guide: <span className="text-brand">symptoms, timelines and safe treatment.</span>
+            <h1 className="calm-hero-title mx-auto mt-5 max-w-7xl text-balance text-[clamp(2.65rem,5.7vw,5.25rem)] leading-[0.96] tracking-[-0.05em]">
+              Your alcohol detox guide: <span>symptoms, timelines and safe treatment.</span>
             </h1>
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-muted md:text-xl md:leading-9">
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-graphite/65 md:text-lg md:leading-8">
               Understand alcohol withdrawal symptoms, the detox timeline and when medical support matters — without jargon or judgement.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a href="#understanding" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-brand px-7 text-base font-bold text-white shadow-[0_14px_36px_rgba(241,152,133,.3)] transition hover:-translate-y-1 hover:bg-[#e88975]">
+            <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+              <a href="#understanding" className="calm-primary-button inline-flex min-h-14 items-center justify-center gap-2 rounded-full px-7 text-base font-bold text-white">
                 Start with the basics <ArrowRight className="h-4 w-4" />
               </a>
-              <a href={phoneHref} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-graphite/15 bg-white/85 px-7 text-base font-bold transition hover:-translate-y-1 hover:border-brand">
+              <a href={phoneHref} className="calm-secondary-button inline-flex min-h-14 items-center justify-center gap-2 rounded-full px-7 text-base font-bold">
                 <Phone className="h-4 w-4 text-brand" /> Speak to someone
               </a>
             </div>
-            <div className="mt-9 grid max-w-2xl gap-3 text-sm sm:grid-cols-3">
+            <div className="mx-auto mt-6 flex max-w-2xl flex-wrap justify-center gap-2.5 text-sm">
               {[
                 [Stethoscope, "Medical review"],
                 [LockKeyhole, "Confidential support"],
@@ -374,10 +370,8 @@ export function WellbourneMicrosite() {
               ].map(([Icon, label]) => {
                 const TrustIcon = Icon as typeof Stethoscope;
                 return (
-                  <div key={label as string} className="flex items-center gap-2 font-semibold text-graphite/70">
-                    <span className="grid h-8 w-8 place-items-center rounded-full bg-white shadow-sm">
-                      <TrustIcon className="h-4 w-4 text-brand" />
-                    </span>
+                  <div key={label as string} className="calm-trust-pill flex items-center gap-2 font-semibold text-graphite/65">
+                    <TrustIcon className="h-4 w-4 text-brand" />
                     {label as string}
                   </div>
                 );
@@ -385,45 +379,63 @@ export function WellbourneMicrosite() {
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[580px]">
-            <div className="absolute -left-7 top-12 h-28 w-28 rounded-full border-[22px] border-brand/10" />
-            <div className="absolute -right-7 -top-6 h-32 w-32 rounded-full bg-sage/70 blur-2xl" />
-            <div className="relative overflow-hidden rounded-[2rem] border border-white bg-white p-3 shadow-[0_30px_90px_rgba(17,24,39,.14)]">
-              <div className="relative min-h-[440px] overflow-hidden rounded-[1.45rem] bg-[#e9e4dc]">
+          <div className="calm-card-stage relative mx-auto mt-8 max-w-5xl md:mt-10">
+            <div className="calm-orb calm-orb-alert">
+              <CircleAlert className="h-5 w-5" />
+            </div>
+            <div className="calm-orb calm-orb-heart">
+              <HeartHandshake className="h-5 w-5" />
+            </div>
+
+            <article className="calm-support-card calm-support-card-left">
+              <span className="calm-card-icon"><Stethoscope className="h-5 w-5" /></span>
+              <p className="calm-card-eyebrow">Medical review</p>
+              <p className="calm-card-title">Clear guidance for a safer first step.</p>
+            </article>
+
+            <article className="calm-image-card">
+              <div className="relative min-h-[340px] overflow-hidden rounded-[1.8rem] md:min-h-[380px]">
                 <Image
                   src="/new images/1.jpg"
                   alt="A calm private conversation with a care professional"
                   fill
-                  sizes="(max-width: 1024px) 100vw, 45vw"
+                  sizes="(max-width: 768px) 92vw, 40vw"
                   className="object-cover"
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-graphite/65 via-transparent to-transparent" />
-                <div className="absolute inset-x-5 bottom-5 rounded-2xl border border-white/20 bg-white/90 p-5 shadow-xl backdrop-blur-md">
-                  <div className="flex items-start gap-4">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand-ink">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#181529]/75 via-transparent to-white/5" />
+                <div className="calm-warning-card absolute inset-x-4 bottom-4 p-4 sm:inset-x-5 sm:bottom-5 sm:p-5">
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#fff0eb] text-brand-ink">
                       <CircleAlert className="h-5 w-5" />
                     </span>
                     <div>
-                      <p className="font-bold">Do not stop suddenly if you may be dependent.</p>
-                      <p className="mt-1 text-sm leading-6 text-muted">Withdrawal can be unpredictable. Ask a healthcare professional for advice first.</p>
+                      <p className="calm-warning-title">Do not stop suddenly if you may be dependent.</p>
+                      <p className="calm-warning-copy">Withdrawal can be unpredictable. Ask a healthcare professional for advice first.</p>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="absolute -right-4 top-8 hidden rounded-2xl border border-graphite/10 bg-graphite px-5 py-4 text-white shadow-xl sm:block">
-              <p className="text-2xl font-extrabold text-brand">24/7</p>
-              <p className="mt-1 text-xs font-semibold text-white/65">Support available</p>
+            </article>
+
+            <article className="calm-support-card calm-support-card-right">
+              <span className="calm-card-icon"><LockKeyhole className="h-5 w-5" /></span>
+              <p className="calm-card-eyebrow">Confidential support</p>
+              <p className="calm-card-title">A private, judgement-free conversation.</p>
+            </article>
+
+            <div className="calm-availability">
+              <span className="text-xl font-extrabold text-brand">24/7</span>
+              <span className="text-xs font-semibold text-graphite/55">Support available</span>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="understanding" className="px-5 py-20 md:py-28">
+      <section id="understanding" className="understanding-section px-5 py-20 md:py-24">
         <div className="page-shell">
-          <div className="grid gap-12 lg:grid-cols-[.82fr_1.18fr] lg:items-start">
-            <div className="lg:sticky lg:top-32">
+          <div className="understanding-layout">
+            <div className="understanding-intro">
               <SectionIntro
                 eyebrow="Understanding alcohol detox"
                 title="Detox helps your body adjust safely."
@@ -437,23 +449,8 @@ export function WellbourneMicrosite() {
                   Withdrawal symptoms vary considerably from person to person. The safest alcohol detox treatment depends on drinking history, health, previous withdrawal, medication and support at home.
                 </InfoPanel>
               </div>
-              <Reveal delay={0.25} className="mt-6 overflow-hidden rounded-2xl">
-                <div className="relative h-56">
-                  <Image
-                    src="/images/doctor-talking.png"
-                    alt="A healthcare professional in a warm, supportive consultation about alcohol detox options"
-                    fill
-                    sizes="(max-width: 1024px) 90vw, 34vw"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-graphite/60 via-transparent to-transparent" />
-                  <p className="absolute bottom-4 left-4 right-4 text-xs font-semibold leading-5 text-white/90">
-                    A thorough assessment identifies the safest type of support — whether at home, in hospital or in a residential clinic.
-                  </p>
-                </div>
-              </Reveal>
             </div>
-            <div className="grid gap-5">
+            <div className="understanding-cards">
               {[
                 {
                   number: "01",
@@ -474,7 +471,7 @@ export function WellbourneMicrosite() {
                   text: "Medically assisted alcohol detox may be advised after heavy daily drinking, previous seizures or DTs, repeated withdrawal, significant health problems, pregnancy, or where there is limited support. Assessment determines whether home, hospital or residential alcohol detox is appropriate.",
                 },
               ].map((item, index) => (
-                <Reveal key={item.number} delay={index * 0.08} className={index === 1 ? "lg:ml-10" : index === 2 ? "lg:ml-4" : ""}>
+                <Reveal key={item.number} delay={index * 0.08}>
                   <article className="reference-card group">
                     <div className="flex items-start gap-5">
                       <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-soft text-brand-ink transition group-hover:rotate-[-4deg] group-hover:scale-105">
@@ -494,6 +491,24 @@ export function WellbourneMicrosite() {
               ))}
             </div>
           </div>
+          <Reveal delay={0.25} className="understanding-image mt-10 overflow-hidden rounded-[1.75rem]">
+            <div className="relative h-64 md:h-72">
+              <Image
+                src="/images/doctor-talking.png"
+                alt="A healthcare professional in a warm, supportive consultation about alcohol detox options"
+                fill
+                sizes="(max-width: 1280px) 100vw, 1280px"
+                className="object-cover object-center"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(14,17,27,.9)_0%,rgba(14,17,27,.6)_38%,rgba(14,17,27,.12)_72%,transparent_100%)]" />
+              <div className="understanding-image-copy absolute inset-y-0 left-0 flex max-w-3xl flex-col justify-center px-7 py-8 md:px-12">
+                <p className="understanding-image-label">The right level of care</p>
+                <p className="understanding-image-statement">
+                  A thorough assessment identifies the safest type of support — whether at home, in hospital or in a residential clinic.
+                </p>
+              </div>
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -676,30 +691,60 @@ export function WellbourneMicrosite() {
               General guide only — individual experience varies. Source: NICE clinical guideline CG100; SIGN 74 — The management of harmful drinking and alcohol dependence.
             </p>
           </motion.div>
-          <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {[
-              { src: "/images/morning-walk.png", alt: "A person on a morning walk — gentle movement supports physical recovery in the early days", caption: "Early days" },
-              { src: "/images/forest.png", alt: "A forest path representing the gradual, day-by-day journey through withdrawal", caption: "Day by day" },
-              { src: "/images/human-talking.png", alt: "Two people talking openly — professional support is essential during alcohol withdrawal", caption: "With support" },
-            ].map((img) => (
-              <Reveal key={img.src} className="relative h-36 overflow-hidden rounded-2xl">
-                <Image src={img.src} alt={img.alt} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover opacity-60" />
-                <div className="absolute inset-0 rounded-2xl bg-graphite/45" />
-                <p className="absolute bottom-3 left-4 text-xs font-bold uppercase tracking-[0.14em] text-white/70">{img.caption}</p>
-              </Reveal>
+          <div
+            className="interactive-timeline mt-12"
+            onMouseLeave={() => setActiveTimelineStage(null)}
+          >
+            <div className="interactive-timeline-line" aria-hidden="true" />
+            {timeline.map((item, index) => (
+              <div key={item.time} className="interactive-timeline-point">
+                <button
+                  type="button"
+                  className={`interactive-timeline-dot ${activeTimelineStage === index ? "is-active" : ""}`}
+                  onMouseEnter={() => setActiveTimelineStage(index)}
+                  onFocus={() => setActiveTimelineStage(index)}
+                  onBlur={() => setActiveTimelineStage(null)}
+                  onClick={() => setActiveTimelineStage((current) => current === index ? null : index)}
+                  aria-label={`Show common symptoms for ${item.time}`}
+                  aria-expanded={activeTimelineStage === index}
+                  aria-controls={`timeline-tooltip-${index}`}
+                >
+                  <item.icon className="h-5 w-5" />
+                </button>
+                <p className="interactive-timeline-label">{item.time}</p>
+                <AnimatePresence>
+                  {activeTimelineStage === index && (
+                    <motion.div
+                      id={`timeline-tooltip-${index}`}
+                      className="interactive-timeline-tooltip"
+                      role="tooltip"
+                      initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      <p>Common symptoms</p>
+                      <ul>
+                        {timelineSymptoms[index].map((symptom) => <li key={symptom}>{symptom}</li>)}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ))}
           </div>
-          <ol className="timeline-list mt-14">
+          <ol className="timeline-list mt-10">
             {timeline.map((item, index) => (
               <motion.li
                 key={item.time}
-                className="timeline-item"
+                className={`timeline-item ${activeTimelineStage === index ? "is-active" : ""}`}
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.5, delay: index * 0.08 }}
+                onMouseEnter={() => setActiveTimelineStage(index)}
+                onMouseLeave={() => setActiveTimelineStage(null)}
               >
-                <div className="timeline-marker"><item.icon className="h-5 w-5" /></div>
                 <div className="timeline-card">
                   <div className="timeline-stage">Stage {index + 1} of 4</div>
                   <div className="p-6 md:p-7">
@@ -779,35 +824,6 @@ export function WellbourneMicrosite() {
               </div>
             </div>
           </Reveal>
-          <Reveal className="mt-8">
-            <div className="programme-panel">
-              <div className="flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-soft text-brand-ink">
-                  <CalendarDays className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-xs font-extrabold uppercase tracking-[.16em] text-brand">Common programme lengths</p>
-                  <p className="mt-1 text-sm text-muted">Examples only — the right duration depends on individual needs.</p>
-                </div>
-              </div>
-              <div className="programme-stats">
-                {programmeLengths.map((item, index) => (
-                  <motion.div
-                    key={item.value}
-                    className="programme-stat"
-                    initial={{ opacity: 0, scale: 0.94 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.08 }}
-                  >
-                    <p><strong>{item.value}</strong> <span>{item.unit}</span></p>
-                    <div className="programme-progress"><i style={{ width: `${25 + index * 25}%` }} /></div>
-                    <p className="mt-2 text-xs font-semibold text-muted">{item.label}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </Reveal>
         </div>
       </section>
 
@@ -825,10 +841,10 @@ export function WellbourneMicrosite() {
               </p>
               <div className="mt-9 grid gap-4 sm:grid-cols-2">
                 {[
-                  [ShieldCheck, "Safety", "Assess withdrawal risk, monitor changing symptoms and provide appropriate medication or urgent care when needed."],
-                  [Brain, "Therapy", "Explore triggers, thoughts, emotions and patterns that detox alone cannot address."],
-                  [BedDouble, "Structure", "Provide regular meals, rest, appointments and a predictable routine away from immediate access to alcohol."],
-                  [HeartHandshake, "Aftercare", "Plan ongoing therapy, peer or family support, healthy routines and practical responses to cravings or setbacks."],
+                  [ShieldCheck, "Safety", "Assess withdrawal risk, monitor changing symptoms and provide urgent care when needed — particularly during the peak risk period at days 2–3."],
+                  [Pill, "Medication", "Chlordiazepoxide or diazepam are commonly prescribed during medically assisted detox to reduce seizure risk and manage moderate-to-severe withdrawal."],
+                  [BedDouble, "Structure", "Provide regular meals, rest, clinical observations and a predictable routine away from immediate access to alcohol."],
+                  [ClipboardCheck, "Monitoring", "CIWA-Ar scoring tracks how symptoms change over time and guides decisions about dosage, escalation or step-down across the detox period."],
                 ].map(([Icon, title, text]) => {
                   const ItemIcon = Icon as typeof ShieldCheck;
                   return (
@@ -854,43 +870,27 @@ export function WellbourneMicrosite() {
           <div className="mt-14">
             <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
               <div>
-                <p className="medical-eyebrow">Recovery journey</p>
-                <h3 className="mt-3 text-3xl font-bold tracking-[-.035em] md:text-4xl">A connected pathway, not a single event.</h3>
+                <p className="medical-eyebrow">Clinical assessment</p>
+                <h3 className="mt-3 text-3xl font-bold tracking-[-.035em] md:text-4xl">What a medically assisted detox assessment covers.</h3>
               </div>
-              <p className="max-w-lg text-sm leading-6 text-muted">People may enter at different points or revisit earlier stages. The pathway is a guide, not a test.</p>
+              <p className="max-w-lg text-sm leading-6 text-muted">A thorough assessment before detox begins identifies the safest treatment setting and the level of supervision needed throughout.</p>
             </div>
-            <Reveal className="mt-8 overflow-hidden rounded-2xl">
-              <div className="relative h-48 md:h-56">
-                <Image
-                  src="/images/father-son-walking.png"
-                  alt="A father and son walking together outdoors — recovery is strengthened by family connection and continuing support"
-                  fill
-                  sizes="(max-width: 768px) 100vw, 80vw"
-                  className="object-cover object-top"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#f7f4ee] via-[#f7f4ee]/50 to-transparent" />
-                <p className="absolute left-6 top-1/2 -translate-y-1/2 max-w-xs text-sm font-semibold leading-6 text-graphite/90 md:max-w-sm">
-                  Recovery is rarely a straight line — but every step forward matters.
-                </p>
-              </div>
-            </Reveal>
-            <ol className="recovery-path mt-10">
-              {recoveryJourney.map((step, index) => (
-                <motion.li
-                  key={step.title}
-                  className="recovery-step"
-                  initial={{ opacity: 0, x: -12 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {assessmentAreas.map(({ icon: Icon, title, text }, index) => (
+                <motion.div
+                  key={title}
+                  className="rounded-2xl border border-graphite/10 bg-white p-6 shadow-sm"
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.07 }}
+                  transition={{ duration: 0.45, delay: index * 0.08 }}
                 >
-                  <div className="recovery-node"><step.icon className="h-5 w-5" /></div>
-                  <p className="mt-4 text-xs font-bold uppercase tracking-[.14em] text-brand">0{index + 1}</p>
-                  <h4 className="mt-1 font-bold">{step.title}</h4>
-                  <p className="mt-2 text-sm leading-6 text-muted">{step.text}</p>
-                </motion.li>
+                  <Icon className="h-5 w-5 text-brand" />
+                  <h4 className="mt-3 font-bold">{title}</h4>
+                  <p className="mt-2 text-sm leading-6 text-muted">{text}</p>
+                </motion.div>
               ))}
-            </ol>
+            </div>
           </div>
         </div>
       </section>
