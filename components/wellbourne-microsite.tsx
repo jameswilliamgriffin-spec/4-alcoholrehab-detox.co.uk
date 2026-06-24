@@ -186,7 +186,7 @@ function Logo() {
         width={220}
         height={33}
         priority
-        className="h-auto w-[184px] sm:w-[210px]"
+        className="h-auto w-[200px] sm:w-[210px]"
       />
       <span className="hidden border-l border-graphite/15 pl-3 text-[10px] font-bold uppercase leading-4 tracking-[0.16em] text-muted xl:block">
         Alcohol detox
@@ -292,7 +292,7 @@ export function WellbourneMicrosite() {
       </div>
 
       <header className="sticky top-0 z-50 border-b border-graphite/10 bg-cream/95 backdrop-blur-xl">
-        <div className="page-shell flex h-[78px] items-center justify-between">
+        <div className="page-shell flex h-[78px] items-center justify-between px-4 sm:px-5 xl:px-0">
           <Logo />
           <nav className="hidden items-center gap-7 text-sm font-semibold text-graphite/70 lg:flex" aria-label="Main navigation">
             <a className="nav-item" href="#understanding">Understanding detox</a>
@@ -319,7 +319,7 @@ export function WellbourneMicrosite() {
           </button>
         </div>
         {menuOpen && (
-          <nav className="page-shell grid gap-1 border-t border-graphite/10 py-4 text-sm font-semibold sm:hidden" aria-label="Mobile navigation">
+          <nav className="page-shell grid gap-1 border-t border-graphite/10 px-4 py-4 text-sm font-semibold sm:hidden" aria-label="Mobile navigation">
             {[
               ["Understanding detox", "#understanding"],
               ["Withdrawal symptoms", "#symptoms"],
@@ -522,11 +522,11 @@ export function WellbourneMicrosite() {
             className="object-cover object-center"
           />
           <div className="absolute inset-0 bg-graphite/65" />
-          <div className="relative flex min-h-[380px] items-center px-5 md:min-h-[440px]">
+          <div className="withdrawal-perspective-content relative flex min-h-[380px] items-center px-5 md:min-h-[440px]">
             <div className="page-shell">
               <Reveal>
                 <div className="max-w-2xl">
-                  <p className="medical-eyebrow text-brand">A calmer perspective</p>
+                  <p className="withdrawal-perspective-eyebrow medical-eyebrow text-brand">A calmer perspective</p>
                   <p className="mt-5 text-balance text-[clamp(1.7rem,3.5vw,2.75rem)] font-bold leading-[1.15] tracking-[-0.035em] text-white">
                     Withdrawal is unpredictable. No one should have to face it without the right support.
                   </p>
